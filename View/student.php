@@ -150,8 +150,8 @@ button:hover {
                 View your currently enrolled courses.
             </p>
 
-            <button onclick="message('My Courses')">
-                View Courses
+            <button onclick="window.location.href='student_courses.php'">
+            View Courses
             </button>
 
         </div>
@@ -165,8 +165,8 @@ button:hover {
                 Check your attendance for each course.
             </p>
 
-            <button onclick="message('Attendance')">
-                View Attendance
+            <button onclick="window.location.href='student_attendance.php'">
+            View Attendance
             </button>
 
         </div>
@@ -180,8 +180,8 @@ button:hover {
                 View your course marks and results.
             </p>
 
-            <button onclick="message('Marks')">
-                View Marks
+            <button onclick="window.location.href='student_marks.php'">
+            View Marks
             </button>
 
         </div>

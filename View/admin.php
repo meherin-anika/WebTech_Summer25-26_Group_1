@@ -150,8 +150,8 @@ button:hover {
                 Create Teacher, Student and Course Administrator accounts.
             </p>
 
-            <button onclick="message('Create User')">
-                Create User
+            <button onclick="window.location.href='create_user.php'">
+            Create User
             </button>
 
         </div>
@@ -165,8 +165,8 @@ button:hover {
                 View, edit and manage system users.
             </p>
 
-            <button onclick="message('Manage Users')">
-                Manage Users
+            <button onclick="window.location.href='manage_users.php'">
+            Manage Users
             </button>
 
         </div>
@@ -180,8 +180,8 @@ button:hover {
                 View overall university system information.
             </p>
 
-            <button onclick="message('System Overview')">
-                View System
+            <button onclick="window.location.href='system_overview.php'">
+            View System
             </button>
 
         </div>

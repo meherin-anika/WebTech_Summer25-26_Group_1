@@ -150,8 +150,8 @@ button:hover {
                 View the courses assigned to you.
             </p>
 
-            <button onclick="message('My Courses')">
-                View Courses
+            <button onclick="window.location.href='teacher_courses.php'">
+            View Courses
             </button>
 
         </div>
@@ -165,8 +165,8 @@ button:hover {
                 Record and manage student attendance.
             </p>
 
-            <button onclick="message('Attendance')">
-                Manage Attendance
+            <button onclick="window.location.href='teacher_attendance.php'">
+            Manage Attendance
             </button>
 
         </div>
@@ -180,8 +180,8 @@ button:hover {
                 Enter and manage student marks.
             </p>
 
-            <button onclick="message('Marks')">
-                Enter Marks
+            <button onclick="window.location.href='teacher_marks.php'">
+            Enter Marks
             </button>
 
         </div>
