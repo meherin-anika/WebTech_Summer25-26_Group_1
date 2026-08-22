@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 
-<title>My Courses - Teacher</title>
+<title>Faculty Assignment</title>
 
 <style>
 
@@ -69,34 +68,25 @@ body {
 }
 
 
-/* Page Title */
+/* Welcome */
 
-.page-title {
-    margin-bottom: 25px;
+.welcome {
+    margin-bottom: 30px;
 }
 
-.page-title h2 {
+.welcome h2 {
     margin-bottom: 8px;
 }
 
-.page-title p {
-    color: #000000;
+.welcome p {
+    color: #333333;
 }
 
 
-/* Table Card */
+/* Faculty List */
 
-.table-card {
-    background: #fffdf7;
-
-    padding: 25px;
-
-    border-radius: 10px;
-
-    border: 1px solid #eadfc9;
-
-    box-shadow: 0 3px 10px rgba(75, 20, 20, 0.12);
-
+.faculty-list {
+    width: 100%;
     overflow-x: auto;
 }
 
@@ -105,98 +95,84 @@ body {
 
 table {
     width: 100%;
-
     border-collapse: collapse;
+    background: white;
 }
 
 th {
     background: #741f2b;
-
     color: white;
 
-    padding: 13px;
+    padding: 12px;
 
     text-align: left;
-
-    font-size: 14px;
 }
 
 td {
-    padding: 16px;
+    padding: 12px;
 
-    border-bottom: 1px solid #eadfc9;
-
-    font-size: 14px;
+    border-bottom: 1px solid #ddd;
 }
 
 
-/* Empty Table */
+/* Assign Button */
 
-.empty-row {
+.assign-btn {
+    background: #741f2b;
+    color: white;
+
+    border: none;
+
+    padding: 8px 14px;
+
+    border-radius: 5px;
+
+    cursor: pointer;
+}
+
+.assign-btn:hover {
+    background: #5c1721;
+}
+
+
+/* No Data */
+
+.no-data {
     text-align: center;
-
     color: #555555;
 
-    padding: 35px;
-}
-
-
-/* Responsive */
-
-@media (max-width: 800px) {
-
-    .header {
-        padding: 20px;
-    }
-
-    .container {
-        padding: 25px;
-    }
-
+    padding: 25px;
 }
 
 </style>
 
 </head>
 
-
 <body>
-
-
-<!-- Header -->
 
 <div class="header">
 
-    <h1>My Courses</h1>
+    <h1>Faculty Assignment</h1>
 
-    <a href="teacher.php" class="back">
+    <a href="course_admin.php" class="back">
         Back to Dashboard
     </a>
 
 </div>
 
-
-<!-- Main Content -->
-
 <div class="container">
 
+    <div class="welcome">
 
-    <!-- Page Title -->
-
-    <div class="page-title">
-
-        <h2>Courses Assigned to Me</h2>
+        <h2>Assign Faculty</h2>
 
         <p>
-            View the courses assigned to you and their class schedules.
+            Assign teachers to university courses.
         </p>
 
     </div>
 
-
-    <!-- Course Table -->
-
-    <div class="table-card">
+    <div class="faculty-list">
 
         <table>
 
@@ -210,28 +186,20 @@ td {
 
                     <th>Course Code</th>
 
-                    <th>Credit</th>
+                    <th>Assigned Teacher</th>
 
-                    <th>Class Week(s)</th>
-
-                    <th>Class Time</th>
+                    <th>Action</th>
 
                 </tr>
 
             </thead>
 
-
             <tbody>
-
-                <!--
-                    Course information will be loaded
-                    from the database later.
-                -->
 
                 <tr>
 
-                    <td colspan="6" class="empty-row">
-                        No courses assigned.
+                    <td colspan="5" class="no-data">
+                        No faculty assignment data available.
                     </td>
 
                 </tr>
@@ -242,10 +210,7 @@ td {
 
     </div>
 
-
 </div>
 
-
 </body>
-
 </html>

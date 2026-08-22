@@ -1,8 +1,34 @@
+```php
+<?php
+
+if (isset($_GET["from"])) {
+
+    if ($_GET["from"] == "course_admin.php") {
+        $backPage = "course_admin.php";
+    }
+    else if ($_GET["from"] == "teacher.php") {
+        $backPage = "teacher.php";
+    }
+    else if ($_GET["from"] == "student.php") {
+        $backPage = "student.php";
+    }
+    else {
+        $backPage = "admin.php";
+    }
+
+}
+else {
+    $backPage = "admin.php";
+}
+
+?>
+
 <!DOCTYPE html>
 <html>
+
 <head>
 
-<title>Create User</title>
+<title>Edit Profile</title>
 
 <style>
 
@@ -37,6 +63,9 @@ body {
 .header h1 {
     font-size: 24px;
 }
+
+
+/* Back Button */
 
 .back {
     background: #fffdf7;
@@ -126,8 +155,7 @@ label {
     font-size: 14px;
 }
 
-input,
-select {
+input {
     width: 100%;
 
     padding: 11px;
@@ -143,8 +171,7 @@ select {
     color: #000000;
 }
 
-input:focus,
-select:focus {
+input:focus {
     outline: none;
 
     border-color: #741f2b;
@@ -214,9 +241,9 @@ button:hover {
 
 <div class="header">
 
-    <h1>Create User</h1>
+    <h1>Edit Profile</h1>
 
-    <a href="admin.php" class="back">
+    <a href="<?php echo $backPage; ?>" class="back">
         Back to Dashboard
     </a>
 
@@ -229,14 +256,14 @@ button:hover {
 
     <div class="box">
 
-        <h2>Create New User</h2>
+        <h2>Manage Profile Information</h2>
 
         <p class="subtitle">
-            Create an account directly for a university user.
+            Update your personal account information.
         </p>
 
 
-        <form id="userForm">
+        <form id="profileForm">
 
 
             <div class="form-group">
@@ -280,12 +307,12 @@ button:hover {
 
             <div class="form-group">
 
-                <label>Password</label>
+                <label>New Password</label>
 
                 <input
                     type="password"
                     name="password"
-                    placeholder="Enter password"
+                    placeholder="Enter new password"
                 >
 
             </div>
@@ -304,42 +331,15 @@ button:hover {
             </div>
 
 
-            <div class="form-group">
-
-                <label>Role</label>
-
-                <select name="role">
-
-                    <option value="">
-                        Select Role
-                    </option>
-
-                    <option value="student">
-                        Student
-                    </option>
-
-                    <option value="teacher">
-                        Teacher
-                    </option>
-
-                    <option value="course_admin">
-                        Course Administrator
-                    </option>
-
-                </select>
-
-            </div>
-
-
             <div class="buttons">
 
                 <button type="submit">
-                    Create User
+                    Save Changes
                 </button>
 
                 <button
                     type="button"
-                    onclick="window.location.href='admin.php'">
+                    onclick="window.location.href='<?php echo $backPage; ?>'">
                     Cancel
                 </button>
 
@@ -355,7 +355,7 @@ button:hover {
 
 <script>
 
-document.getElementById("userForm").onsubmit = function(event) {
+document.getElementById("profileForm").onsubmit = function(event) {
 
     event.preventDefault();
 
@@ -375,20 +375,14 @@ document.getElementById("userForm").onsubmit = function(event) {
     let confirmPassword =
         document.querySelector("[name='confirm_password']").value.trim();
 
-    let role =
-        document.querySelector("[name='role']").value;
-
 
     if (
         name === "" ||
         email === "" ||
-        username === "" ||
-        password === "" ||
-        confirmPassword === "" ||
-        role === ""
+        username === ""
     ) {
 
-        alert("Please fill all fields.");
+        alert("Please fill all required fields.");
 
         return;
 
@@ -404,7 +398,7 @@ document.getElementById("userForm").onsubmit = function(event) {
     }
 
 
-    alert("User created successfully.");
+    alert("Profile updated successfully.");
 
 };
 
@@ -412,4 +406,7 @@ document.getElementById("userForm").onsubmit = function(event) {
 
 
 </body>
+
 </html>
+```
+

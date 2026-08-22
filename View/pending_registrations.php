@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 
-<title>My Courses - Teacher</title>
+<title>Pending Registrations</title>
 
 <style>
+
+/* General */
 
 * {
     box-sizing: border-box;
@@ -38,7 +39,7 @@ body {
 }
 
 
-/* Back to Dashboard */
+/* Back Button */
 
 .back {
     background: #fffdf7;
@@ -69,34 +70,25 @@ body {
 }
 
 
-/* Page Title */
+/* Page Introduction */
 
-.page-title {
-    margin-bottom: 25px;
+.welcome {
+    margin-bottom: 35px;
 }
 
-.page-title h2 {
+.welcome h2 {
     margin-bottom: 8px;
 }
 
-.page-title p {
-    color: #000000;
+.welcome p {
+    color: #333333;
 }
 
 
-/* Table Card */
+/* User List */
 
-.table-card {
-    background: #fffdf7;
-
-    padding: 25px;
-
-    border-radius: 10px;
-
-    border: 1px solid #eadfc9;
-
-    box-shadow: 0 3px 10px rgba(75, 20, 20, 0.12);
-
+.user-list {
+    width: 100%;
     overflow-x: auto;
 }
 
@@ -105,16 +97,15 @@ body {
 
 table {
     width: 100%;
-
     border-collapse: collapse;
+    background: white;
 }
 
 th {
     background: #741f2b;
-
     color: white;
 
-    padding: 13px;
+    padding: 12px;
 
     text-align: left;
 
@@ -122,11 +113,38 @@ th {
 }
 
 td {
-    padding: 16px;
+    padding: 12px;
 
-    border-bottom: 1px solid #eadfc9;
+    border-bottom: 1px solid #ddd;
 
     font-size: 14px;
+}
+
+
+/* Action Buttons */
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+button {
+    background: #741f2b;
+    color: white;
+
+    border: none;
+
+    padding: 8px 14px;
+
+    border-radius: 5px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+}
+
+button:hover {
+    background: #5c1721;
 }
 
 
@@ -137,28 +155,12 @@ td {
 
     color: #555555;
 
-    padding: 35px;
-}
-
-
-/* Responsive */
-
-@media (max-width: 800px) {
-
-    .header {
-        padding: 20px;
-    }
-
-    .container {
-        padding: 25px;
-    }
-
+    padding: 25px;
 }
 
 </style>
 
 </head>
-
 
 <body>
 
@@ -167,9 +169,9 @@ td {
 
 <div class="header">
 
-    <h1>My Courses</h1>
+    <h1>Pending Registrations</h1>
 
-    <a href="teacher.php" class="back">
+    <a href="admin.php" class="back">
         Back to Dashboard
     </a>
 
@@ -180,23 +182,20 @@ td {
 
 <div class="container">
 
+    <div class="welcome">
 
-    <!-- Page Title -->
-
-    <div class="page-title">
-
-        <h2>Courses Assigned to Me</h2>
+        <h2>Registration Requests</h2>
 
         <p>
-            View the courses assigned to you and their class schedules.
+            Review and manage pending user registration requests.
         </p>
 
     </div>
 
 
-    <!-- Course Table -->
+    <!-- Registration Table -->
 
-    <div class="table-card">
+    <div class="user-list">
 
         <table>
 
@@ -204,17 +203,17 @@ td {
 
                 <tr>
 
-                    <th>Course ID</th>
+                    <th>ID</th>
 
-                    <th>Course Name</th>
+                    <th>Name</th>
 
-                    <th>Course Code</th>
+                    <th>Username</th>
 
-                    <th>Credit</th>
+                    <th>Email</th>
 
-                    <th>Class Week(s)</th>
+                    <th>Role</th>
 
-                    <th>Class Time</th>
+                    <th>Action</th>
 
                 </tr>
 
@@ -223,15 +222,10 @@ td {
 
             <tbody>
 
-                <!--
-                    Course information will be loaded
-                    from the database later.
-                -->
-
                 <tr>
 
                     <td colspan="6" class="empty-row">
-                        No courses assigned.
+                        No pending registrations available.
                     </td>
 
                 </tr>
@@ -242,10 +236,8 @@ td {
 
     </div>
 
-
 </div>
 
 
 </body>
-
 </html>

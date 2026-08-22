@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
 <title>My Courses - Student</title>
@@ -18,12 +19,15 @@ body {
     color: #000000;
 }
 
+
 /* Header */
 
 .header {
     background: #741f2b;
     color: white;
+
     padding: 20px 40px;
+
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -33,24 +37,39 @@ body {
     font-size: 24px;
 }
 
+
+/* Back to Dashboard */
+
 .back {
     background: #fffdf7;
     color: #741f2b;
-    padding: 9px 15px;
+
+    height: 37px;
+    padding: 0 15px;
+
     border-radius: 5px;
+
     text-decoration: none;
     font-weight: 500;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .back:hover {
     background: #f3e8d2;
 }
 
-/* Container */
+
+/* Main Container */
 
 .container {
     padding: 40px;
 }
+
+
+/* Page Title */
 
 .page-title {
     margin-bottom: 25px;
@@ -61,50 +80,87 @@ body {
 }
 
 .page-title p {
-    color: #000000;
+    color: #333333;
 }
 
-/* Table */
+
+/* Course Table */
 
 .table-card {
     background: #fffdf7;
+
     padding: 25px;
+
     border-radius: 10px;
+
     border: 1px solid #eadfc9;
+
     box-shadow: 0 3px 10px rgba(75, 20, 20, 0.12);
+
     overflow-x: auto;
 }
 
 table {
     width: 100%;
+
     border-collapse: collapse;
 }
 
 th {
     background: #741f2b;
+
     color: white;
+
     padding: 13px;
+
     text-align: left;
+
     font-size: 14px;
 }
 
 td {
     padding: 16px;
+
     border-bottom: 1px solid #eadfc9;
+
     font-size: 14px;
 }
 
+
+/* No Data */
+
 .empty-row {
     text-align: center;
+
     color: #555555;
+
     padding: 35px;
+}
+
+
+/* Responsive */
+
+@media (max-width: 800px) {
+
+    .header {
+        padding: 20px;
+    }
+
+    .container {
+        padding: 25px;
+    }
+
 }
 
 </style>
 
 </head>
 
+
 <body>
+
+
+<!-- Header -->
 
 <div class="header">
 
@@ -117,7 +173,12 @@ td {
 </div>
 
 
+<!-- Main Content -->
+
 <div class="container">
+
+
+    <!-- Page Title -->
 
     <div class="page-title">
 
@@ -130,6 +191,8 @@ td {
     </div>
 
 
+    <!-- Course Table -->
+
     <div class="table-card">
 
         <table>
@@ -137,13 +200,19 @@ td {
             <thead>
 
                 <tr>
+
                     <th>Course ID</th>
+
                     <th>Course Name</th>
+
+                    <th>Course Code</th>
+
                     <th>Credit</th>
-                    <th>Department</th>
-                    <th>Teacher</th>
-                    <th>Class Day</th>
+
+                    <th>Class Week(s)</th>
+
                     <th>Class Time</th>
+
                 </tr>
 
             </thead>
@@ -152,14 +221,16 @@ td {
             <tbody>
 
                 <!--
-                    Course information will be loaded
-                    from the database using PHP later.
+                    Only courses in which the student is enrolled
+                    will be shown here.
+
+                    Course information will come from the database later.
                 -->
 
                 <tr>
 
-                    <td colspan="7" class="empty-row">
-                        —
+                    <td colspan="6" class="empty-row">
+                        No enrolled courses available.
                     </td>
 
                 </tr>
@@ -170,7 +241,10 @@ td {
 
     </div>
 
+
 </div>
 
+
 </body>
+
 </html>

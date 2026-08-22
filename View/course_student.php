@@ -2,11 +2,9 @@
 <html>
 <head>
 
-<title>Manage Users - Main Admin</title>
+<title>Student Enrollment</title>
 
 <style>
-
-/* General */
 
 * {
     box-sizing: border-box;
@@ -39,7 +37,7 @@ body {
 }
 
 
-/* Back Button */
+/* Back to Dashboard */
 
 .back {
     background: #fffdf7;
@@ -70,10 +68,10 @@ body {
 }
 
 
-/* Page Introduction */
+/* Welcome */
 
 .welcome {
-    margin-bottom: 35px;
+    margin-bottom: 30px;
 }
 
 .welcome h2 {
@@ -85,9 +83,9 @@ body {
 }
 
 
-/* User List */
+/* Student List */
 
-.user-list {
+.student-list {
     width: 100%;
     overflow-x: auto;
 }
@@ -108,22 +106,18 @@ th {
     padding: 12px;
 
     text-align: left;
-
-    font-size: 14px;
 }
 
 td {
     padding: 12px;
 
     border-bottom: 1px solid #ddd;
-
-    font-size: 14px;
 }
 
 
-/* Delete Button */
+/* Enroll Button */
 
-.delete-btn {
+.enroll-btn {
     background: #741f2b;
     color: white;
 
@@ -134,20 +128,17 @@ td {
     border-radius: 5px;
 
     cursor: pointer;
-
-    font-size: 14px;
 }
 
-.delete-btn:hover {
+.enroll-btn:hover {
     background: #5c1721;
 }
 
 
-/* Empty Table */
+/* No Data */
 
-.empty-row {
+.no-data {
     text-align: center;
-
     color: #555555;
 
     padding: 25px;
@@ -159,38 +150,29 @@ td {
 
 <body>
 
-
-<!-- Header -->
-
 <div class="header">
 
-    <h1>Manage Users</h1>
+    <h1>Student Enrollment</h1>
 
-    <a href="admin.php" class="back">
+    <a href="course_admin.php" class="back">
         Back to Dashboard
     </a>
 
 </div>
 
-
-<!-- Main Content -->
-
 <div class="container">
 
     <div class="welcome">
 
-        <h2>System Users</h2>
+        <h2>Manage Student Enrollment</h2>
 
         <p>
-            View and delete existing users.
+            Manage students enrolled in university courses.
         </p>
 
     </div>
 
-
-    <!-- User Table -->
-
-    <div class="user-list">
+    <div class="student-list">
 
         <table>
 
@@ -198,15 +180,13 @@ td {
 
                 <tr>
 
-                    <th>ID</th>
+                    <th>Student ID</th>
 
-                    <th>Name</th>
+                    <th>Student Name</th>
 
-                    <th>Username</th>
+                    <th>Course ID</th>
 
-                    <th>Email</th>
-
-                    <th>Role</th>
+                    <th>Course Name</th>
 
                     <th>Action</th>
 
@@ -214,13 +194,12 @@ td {
 
             </thead>
 
-
             <tbody>
 
                 <tr>
 
-                    <td colspan="6" class="empty-row">
-                        No users available.
+                    <td colspan="5" class="no-data">
+                        No enrollment data available.
                     </td>
 
                 </tr>
@@ -232,7 +211,6 @@ td {
     </div>
 
 </div>
-
 
 </body>
 </html>

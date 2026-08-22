@@ -2,7 +2,7 @@
 <html>
 <head>
 
-<title>Login</title>
+<title>Registration</title>
 
 <style>
 
@@ -75,6 +75,12 @@ select:focus {
     border-color: #741f2b;
 }
 
+.buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
 button {
     width: 100%;
     padding: 12px;
@@ -106,13 +112,6 @@ button:hover {
     text-decoration: underline;
 }
 
-.error {
-    color: #a00000;
-    font-size: 13px;
-    margin-bottom: 15px;
-    display: none;
-}
-
 </style>
 
 </head>
@@ -123,13 +122,37 @@ button:hover {
 
     <div class="box">
 
-        <h1>University Management System</h1>
+        <h1>Registration</h1>
 
         <p class="subtitle">
-            Please login to continue.
+            Create an account request.
         </p>
 
-        <form id="loginForm">
+        <form id="registrationForm">
+
+            <div class="form-group">
+
+                <label>Name</label>
+
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Enter name"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Email</label>
+
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Enter email"
+                >
+
+            </div>
 
             <div class="form-group">
 
@@ -137,7 +160,7 @@ button:hover {
 
                 <input
                     type="text"
-                    id="username"
+                    name="username"
                     placeholder="Enter username"
                 >
 
@@ -149,7 +172,7 @@ button:hover {
 
                 <input
                     type="password"
-                    id="password"
+                    name="password"
                     placeholder="Enter password"
                 >
 
@@ -157,48 +180,62 @@ button:hover {
 
             <div class="form-group">
 
-                <label>Login As</label>
+                <label>Confirm Password</label>
 
-                <select id="role">
+                <input
+                    type="password"
+                    name="confirm_password"
+                    placeholder="Confirm password"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Register As</label>
+
+                <select name="role">
 
                     <option value="">
                         Select Role
-                    </option>
-
-                    <option value="admin">
-                        Main Admin
-                    </option>
-
-                    <option value="course_admin">
-                        Course Administrator
-                    </option>
-
-                    <option value="teacher">
-                        Teacher
                     </option>
 
                     <option value="student">
                         Student
                     </option>
 
+                    <option value="teacher">
+                        Teacher
+                    </option>
+
+                    <option value="course_admin">
+                        Course Administrator
+                    </option>
+
                 </select>
 
             </div>
 
-            <p class="error" id="error">
-                Please fill all fields.
-            </p>
+            <div class="buttons">
 
-            <button type="submit">
-                Login
-            </button>
+                <button type="submit">
+                    Register
+                </button>
+
+                <button
+                    type="button"
+                    onclick="window.location.href='home.php'">
+                    Cancel
+                </button>
+
+            </div>
 
         </form>
 
         <div class="link">
 
-            <a href="home.php">
-                Back to Home
+            <a href="login.php">
+                Already have an account? Login
             </a>
 
         </div>
@@ -209,37 +246,35 @@ button:hover {
 
 <script>
 
-document.getElementById("loginForm").onsubmit = function(event) {
+document.getElementById("registrationForm").onsubmit = function(event) {
 
     event.preventDefault();
 
-    let username = document.getElementById("username").value.trim();
-    let password = document.getElementById("password").value.trim();
-    let role = document.getElementById("role").value;
+    let name = document.querySelector("[name='name']").value.trim();
+    let email = document.querySelector("[name='email']").value.trim();
+    let username = document.querySelector("[name='username']").value.trim();
+    let password = document.querySelector("[name='password']").value.trim();
+    let confirmPassword = document.querySelector("[name='confirm_password']").value.trim();
+    let role = document.querySelector("[name='role']").value;
 
     if (
+        name === "" ||
+        email === "" ||
         username === "" ||
         password === "" ||
+        confirmPassword === "" ||
         role === ""
     ) {
-        document.getElementById("error").style.display = "block";
+        alert("Please fill all fields.");
         return;
     }
 
-    document.getElementById("error").style.display = "none";
+    if (password !== confirmPassword) {
+        alert("Passwords do not match.");
+        return;
+    }
 
-    if (role === "admin") {
-        window.location.href = "admin.php";
-    }
-    else if (role === "course_admin") {
-        window.location.href = "course_admin.php";
-    }
-    else if (role === "teacher") {
-        window.location.href = "teacher.php";
-    }
-    else if (role === "student") {
-        window.location.href = "student.php";
-    }
+    alert("Registration submitted. Please wait for admin approval.");
 
 };
 
