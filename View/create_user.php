@@ -3,6 +3,7 @@ include "../Model/db.php";
 session_start();
 
 $message = "";
+$message_type = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = trim($_POST["name"] ?? "");
@@ -14,18 +15,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (empty($name) || empty($email) || empty($username) || empty($password) || empty($role)) {
         $message = "Please fill all fields.";
+        $message_type = "error";
     } else if ($password !== $confirm_password) {
         $message = "Passwords do not match.";
+        $message_type = "error";
     } else {
         $database = new db();
         $connection = $database->connection();
         $result = $database->createUserDirect($connection, "users", $name, $email, $username, $password, $role);
 
         if ($result) {
-            header("Location: admin.php");
-            exit();
+            $message = "User created successfully!";
+            $message_type = "success";
         } else {
             $message = "Creation failed. Try again.";
+            $message_type = "error";
         }
     }
 }
@@ -53,7 +57,8 @@ input:focus, select:focus { outline: none; border-color: #741f2b; }
 .buttons { display: flex; gap: 10px; margin-top: 5px; }
 button { width: 100%; padding: 12px; background: #741f2b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
 button:hover { background: #5c1721; }
-.error { color: #a00000; font-size: 13px; margin-bottom: 15px; text-align: center; }
+.error { color: #a00000; background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px; text-align: center; }
+.success { color: #155724; background: #d4edda; border: 1px solid #c3e6cb; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px; text-align: center; }
 .footer { background: #741f2b; color: #fffdf7; text-align: center; padding: 15px 20px; font-size: 14px; margin-top: auto; }
 @media (max-width: 600px) { .header { padding: 20px; } .container { padding: 25px; } .box { width: 100%; max-width: 400px; } }
 </style>
@@ -92,7 +97,11 @@ button:hover { background: #5c1721; }
         <h2>Create New User</h2>
         <p class="subtitle">Create an account directly for a university user.</p>
 
-        <?php if (!empty($message)) { echo "<p class='error'>$message</p>"; } ?>
+        <?php if (!empty($message)): ?>
+            <div class="<?php echo ($message_type === 'success') ? 'success' : 'error'; ?>">
+                <?php echo htmlspecialchars($message); ?>
+            </div>
+        <?php endif; ?>
 
         <form method="post" action="" onsubmit="return collect_data()">
             <div class="form-group">
