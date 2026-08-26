@@ -1,6 +1,7 @@
 <?php
-class db {
-    
+class db
+{
+
     function connection()
     {
         $db_host = "localhost";
@@ -136,7 +137,7 @@ class db {
         $check->bind_param("ss", $course_id, $student_username);
         $check->execute();
         $res = $check->get_result();
-        
+
         if ($res->num_rows > 0) {
             $check->close();
             return false; // Student is already enrolled
@@ -148,6 +149,180 @@ class db {
         $result = $stmt->execute();
         $stmt->close();
         return $result;
+    }
+
+    function getTeacherCourses($connection, $teacher_username)
+    {
+        $stmt = $connection->prepare(
+            "SELECT c.*
+         FROM courses c
+         INNER JOIN faculty_assignments fa
+         ON c.course_id = fa.course_id
+         WHERE fa.faculty_username = ?
+         ORDER BY c.course_code"
+        );
+
+        $stmt->bind_param("s", $teacher_username);
+        $stmt->execute();
+
+        return $stmt->get_result();
+    }
+
+
+    function isTeacherAssignedToCourse($connection, $teacher_username, $course_id)
+    {
+        $stmt = $connection->prepare(
+            "SELECT id
+         FROM faculty_assignments
+         WHERE course_id = ?
+         AND faculty_username = ?"
+        );
+
+        $stmt->bind_param(
+            "ss",
+            $course_id,
+            $teacher_username
+        );
+
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        $exists = $result->num_rows > 0;
+
+        $stmt->close();
+
+        return $exists;
+    }
+
+
+    function getCourseStudents($connection, $course_id)
+    {
+        $stmt = $connection->prepare(
+            "SELECT u.username, u.name
+         FROM student_enrollments se
+         INNER JOIN users u
+         ON se.student_username = u.username
+         WHERE se.course_id = ?
+         AND u.role = 'student'
+         AND u.status = 'approved'
+         ORDER BY u.name"
+        );
+
+        $stmt->bind_param(
+            "s",
+            $course_id
+        );
+
+        $stmt->execute();
+
+        return $stmt->get_result();
+    }
+
+
+    function saveMark(
+        $connection,
+        $course_id,
+        $student_username,
+        $marks,
+        $grade
+    ) {
+        $stmt = $connection->prepare(
+            "INSERT INTO marks
+        (course_id, student_username, marks, grade)
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+        marks = VALUES(marks),
+        grade = VALUES(grade)"
+        );
+
+        $stmt->bind_param(
+            "ssds",
+            $course_id,
+            $student_username,
+            $marks,
+            $grade
+        );
+
+        $result = $stmt->execute();
+
+        $stmt->close();
+
+        return $result;
+    }
+
+
+    function getMarks($connection, $course_id)
+    {
+        $stmt = $connection->prepare(
+            "SELECT student_username, marks, grade
+         FROM marks
+         WHERE course_id = ?"
+        );
+
+        $stmt->bind_param(
+            "s",
+            $course_id
+        );
+
+        $stmt->execute();
+
+        return $stmt->get_result();
+    }
+
+
+    function saveAttendance(
+        $connection,
+        $course_id,
+        $student_username,
+        $attendance_date,
+        $status
+    ) {
+        $stmt = $connection->prepare(
+            "INSERT INTO attendance
+        (course_id, student_username, date, status)
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+        status = VALUES(status)"
+        );
+
+        $stmt->bind_param(
+            "ssss",
+            $course_id,
+            $student_username,
+            $attendance_date,
+            $status
+        );
+
+        $result = $stmt->execute();
+
+        $stmt->close();
+
+        return $result;
+    }
+
+
+    function getAttendance(
+        $connection,
+        $course_id,
+        $attendance_date
+    ) {
+        $stmt = $connection->prepare(
+            "SELECT student_username, status
+         FROM attendance
+         WHERE course_id = ?
+         AND date = ?"
+        );
+
+        $stmt->bind_param(
+            "ss",
+            $course_id,
+            $attendance_date
+        );
+
+        $stmt->execute();
+
+        return $stmt->get_result();
     }
 }
 ?>

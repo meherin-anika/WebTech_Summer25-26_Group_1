@@ -1,0 +1,12 @@
+[
+    {
+        "username": "teacher1",
+        "password": "$2y$10$.H.clTv\/kXeaV7dWgjdk9OpoUliZ\/5byExzEoKILCX85d1by9O7Na",
+        "timestamp": 1787742868
+    },
+    {
+        "username": "student1",
+        "password": "$2y$10$MC6xpCTTiS48oIEeXI78qu3.tUzMb\/cGcRLR942ewidubYL\/eKl1a",
+        "timestamp": 1787743180
+    }
+]

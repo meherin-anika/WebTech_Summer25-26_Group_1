@@ -1,250 +1,314 @@
+<?php
+
+session_start();
+
+if (
+    !isset($_SESSION["logged_in"]) ||
+    $_SESSION["logged_in"] !== true ||
+    $_SESSION["role"] !== "teacher"
+) {
+    header("Location: login.php");
+    exit;
+}
+
+include "../Model/db.php";
+
+$database = new db();
+
+$connection = $database->connection();
+
+$teacher_username = $_SESSION["username"];
+
+$courses = $database->getTeacherCourses(
+    $connection,
+    $teacher_username
+);
+
+?>
+
 <!DOCTYPE html>
+
 <html>
 
 <head>
 
-<title>My Courses - Teacher</title>
+    <title>My Courses - Teacher</title>
 
-<style>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-}
+        body {
+            background: #f7f0df;
+            color: #000000;
+        }
 
-body {
-    background: #f7f0df;
-    color: #000000;
-}
+        .header {
+            background: #741f2b;
+            color: white;
 
+            padding: 20px 40px;
 
-/* Header */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-.header {
-    background: #741f2b;
-    color: white;
+        .header h1 {
+            font-size: 24px;
+        }
 
-    padding: 20px 40px;
+        .back {
+            background: #fffdf7;
+            color: #741f2b;
 
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+            height: 37px;
+            padding: 0 15px;
 
-.header h1 {
-    font-size: 24px;
-}
+            border-radius: 5px;
 
+            text-decoration: none;
+            font-weight: 500;
 
-/* Back to Dashboard */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-.back {
-    background: #fffdf7;
-    color: #741f2b;
+        .back:hover {
+            background: #f3e8d2;
+        }
 
-    height: 37px;
-    padding: 0 15px;
+        .container {
+            padding: 40px;
+        }
 
-    border-radius: 5px;
+        .page-title {
+            margin-bottom: 25px;
+        }
 
-    text-decoration: none;
-    font-weight: 500;
+        .page-title h2 {
+            margin-bottom: 8px;
+        }
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        .page-title p {
+            color: #333333;
+        }
 
-.back:hover {
-    background: #f3e8d2;
-}
+        .course-card {
+            background: #fffdf7;
 
+            padding: 25px;
 
-/* Main Container */
+            margin-bottom: 18px;
 
-.container {
-    padding: 40px;
-}
+            border-radius: 10px;
 
+            border: 1px solid #eadfc9;
 
-/* Page Title */
+            box-shadow: 0 3px 10px rgba(75, 20, 20, 0.12);
+        }
 
-.page-title {
-    margin-bottom: 25px;
-}
+        .course-card h3 {
+            color: #741f2b;
 
-.page-title h2 {
-    margin-bottom: 8px;
-}
+            margin-bottom: 15px;
+        }
 
-.page-title p {
-    color: #000000;
-}
+        .course-info {
+            margin-bottom: 8px;
 
+            font-size: 14px;
+        }
 
-/* Table Card */
+        .label {
+            font-weight: bold;
+        }
 
-.table-card {
-    background: #fffdf7;
+        .empty {
+            background: #fffdf7;
 
-    padding: 25px;
+            padding: 30px;
 
-    border-radius: 10px;
+            border-radius: 10px;
 
-    border: 1px solid #eadfc9;
+            border: 1px solid #eadfc9;
 
-    box-shadow: 0 3px 10px rgba(75, 20, 20, 0.12);
-
-    overflow-x: auto;
-}
-
-
-/* Table */
-
-table {
-    width: 100%;
-
-    border-collapse: collapse;
-}
-
-th {
-    background: #741f2b;
-
-    color: white;
-
-    padding: 13px;
-
-    text-align: left;
-
-    font-size: 14px;
-}
-
-td {
-    padding: 16px;
-
-    border-bottom: 1px solid #eadfc9;
-
-    font-size: 14px;
-}
-
-
-/* Empty Table */
-
-.empty-row {
-    text-align: center;
-
-    color: #555555;
-
-    padding: 35px;
-}
-
-
-/* Responsive */
-
-@media (max-width: 800px) {
-
-    .header {
-        padding: 20px;
-    }
-
-    .container {
-        padding: 25px;
-    }
-
-}
-
-</style>
+            color: #555555;
+        }
+    </style>
 
 </head>
 
-
 <body>
 
+    <div class="header">
 
-<!-- Header -->
+        <h1>My Courses</h1>
 
-<div class="header">
-
-    <h1>My Courses</h1>
-
-    <a href="teacher.php" class="back">
-        Back to Dashboard
-    </a>
-
-</div>
-
-
-<!-- Main Content -->
-
-<div class="container">
-
-
-    <!-- Page Title -->
-
-    <div class="page-title">
-
-        <h2>Courses Assigned to Me</h2>
-
-        <p>
-            View the courses assigned to you and their class schedules.
-        </p>
+        <a href="teacher.php" class="back">
+            Back to Dashboard
+        </a>
 
     </div>
 
 
-    <!-- Course Table -->
+    <div class="container">
 
-    <div class="table-card">
+        <div class="page-title">
 
-        <table>
+            <h2>Courses Assigned to Me</h2>
 
-            <thead>
+            <p>
+                These are the courses assigned to your teacher account.
+            </p>
 
-                <tr>
-
-                    <th>Course ID</th>
-
-                    <th>Course Name</th>
-
-                    <th>Course Code</th>
-
-                    <th>Credit</th>
-
-                    <th>Class Week(s)</th>
-
-                    <th>Class Time</th>
-
-                </tr>
-
-            </thead>
+        </div>
 
 
-            <tbody>
+        <?php if ($courses->num_rows > 0): ?>
 
-                <!--
-                    Course information will be loaded
-                    from the database later.
-                -->
+            <?php while ($course = $courses->fetch_assoc()): ?>
 
-                <tr>
+                <div class="course-card">
 
-                    <td colspan="6" class="empty-row">
-                        No courses assigned.
-                    </td>
+                    <h3>
 
-                </tr>
+                        <?php
 
-            </tbody>
+                        echo htmlspecialchars(
+                            $course["course_code"]
+                            . " - "
+                            . $course["course_name"]
+                        );
 
-        </table>
+                        ?>
+
+                    </h3>
+
+
+                    <div class="course-info">
+
+                        <span class="label">
+                            Course ID:
+                        </span>
+
+                        <?php
+
+                        echo htmlspecialchars(
+                            $course["course_id"]
+                        );
+
+                        ?>
+
+                    </div>
+
+
+                    <div class="course-info">
+
+                        <span class="label">
+                            Course Name:
+                        </span>
+
+                        <?php
+
+                        echo htmlspecialchars(
+                            $course["course_name"]
+                        );
+
+                        ?>
+
+                    </div>
+
+
+                    <div class="course-info">
+
+                        <span class="label">
+                            Course Code:
+                        </span>
+
+                        <?php
+
+                        echo htmlspecialchars(
+                            $course["course_code"]
+                        );
+
+                        ?>
+
+                    </div>
+
+
+                    <div class="course-info">
+
+                        <span class="label">
+                            Credit:
+                        </span>
+
+                        <?php
+
+                        echo htmlspecialchars(
+                            $course["credit"]
+                        );
+
+                        ?>
+
+                    </div>
+
+
+                    <div class="course-info">
+
+                        <span class="label">
+                            Class Day:
+                        </span>
+
+                        <?php
+
+                        echo htmlspecialchars(
+                            $course["day"]
+                        );
+
+                        ?>
+
+                    </div>
+
+
+                    <div class="course-info">
+
+                        <span class="label">
+                            Class Time:
+                        </span>
+
+                        <?php
+
+                        echo htmlspecialchars(
+                            $course["start_time"]
+                            . " - "
+                            . $course["end_time"]
+                        );
+
+                        ?>
+
+                    </div>
+
+                </div>
+
+            <?php endwhile; ?>
+
+        <?php else: ?>
+
+            <div class="empty">
+
+                No courses have been assigned to you yet.
+
+            </div>
+
+        <?php endif; ?>
 
     </div>
-
-
-</div>
-
 
 </body>
 

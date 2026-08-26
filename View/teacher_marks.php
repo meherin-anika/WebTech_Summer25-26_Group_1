@@ -1,456 +1,784 @@
+<?php
+
+session_start();
+
+if (
+    !isset($_SESSION["logged_in"]) ||
+    $_SESSION["logged_in"] !== true ||
+    $_SESSION["role"] !== "teacher"
+) {
+    header("Location: login.php");
+    exit;
+}
+
+include "../Model/db.php";
+
+$database = new db();
+
+$connection = $database->connection();
+
+$teacher_username = $_SESSION["username"];
+
+$message = "";
+
+$selected_course =
+    $_GET["course_id"] ??
+    $_POST["course_id"] ??
+    "";
+
+
+/* ==========================================
+   GRADE CALCULATION
+   ========================================== */
+
+function calculateGrade($mark)
+{
+    if ($mark >= 80) {
+        return "A+";
+    }
+
+    if ($mark >= 75) {
+        return "A";
+    }
+
+    if ($mark >= 70) {
+        return "A-";
+    }
+
+    if ($mark >= 65) {
+        return "B+";
+    }
+
+    if ($mark >= 60) {
+        return "B";
+    }
+
+    if ($mark >= 55) {
+        return "B-";
+    }
+
+    if ($mark >= 50) {
+        return "C+";
+    }
+
+    if ($mark >= 45) {
+        return "C";
+    }
+
+    if ($mark >= 40) {
+        return "D";
+    }
+
+    return "F";
+}
+
+
+/* ==========================================
+   SAVE MARKS
+   ========================================== */
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+    $course_id =
+        trim($_POST["course_id"] ?? "");
+
+
+    if (empty($course_id)) {
+
+        $message =
+            "Please select a course.";
+
+    } elseif (
+        !$database->isTeacherAssignedToCourse(
+            $connection,
+            $teacher_username,
+            $course_id
+        )
+    ) {
+
+        $message =
+            "You are not assigned to this course.";
+
+    } else {
+
+        $marks_data =
+            $_POST["marks"] ?? [];
+
+
+        foreach (
+            $marks_data
+            as $student_username => $mark
+        ) {
+
+            if ($mark === "") {
+                continue;
+            }
+
+
+            $mark = floatval($mark);
+
+
+            if (
+                $mark >= 0 &&
+                $mark <= 100
+            ) {
+
+                $grade =
+                    calculateGrade($mark);
+
+
+                $database->saveMark(
+                    $connection,
+                    $course_id,
+                    $student_username,
+                    $mark,
+                    $grade
+                );
+            }
+        }
+
+
+        $message =
+            "Marks saved successfully.";
+
+
+        $selected_course =
+            $course_id;
+    }
+}
+
+
+/* ==========================================
+   GET TEACHER COURSES
+   ========================================== */
+
+$courses =
+    $database->getTeacherCourses(
+        $connection,
+        $teacher_username
+    );
+
+
+/* ==========================================
+   GET STUDENTS
+   ========================================== */
+
+$students = false;
+
+$existing_marks = [];
+
+
+if (!empty($selected_course)) {
+
+    if (
+        $database->isTeacherAssignedToCourse(
+            $connection,
+            $teacher_username,
+            $selected_course
+        )
+    ) {
+
+        $students =
+            $database->getCourseStudents(
+                $connection,
+                $selected_course
+            );
+
+
+        $marks_result =
+            $database->getMarks(
+                $connection,
+                $selected_course
+            );
+
+
+        while (
+            $mark =
+            $marks_result->fetch_assoc()
+        ) {
+
+            $existing_marks[
+                $mark["student_username"]
+            ] = [
+                "marks" =>
+                    $mark["marks"],
+
+                "grade" =>
+                    $mark["grade"]
+            ];
+        }
+    }
+}
+
+?>
+
 <!DOCTYPE html>
+
 <html>
 
 <head>
 
-<title>Marks - Teacher</title>
+    <title>Marks - Teacher</title>
 
-<style>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-}
+        body {
+            background: #f7f0df;
+            color: #000000;
+        }
 
-body {
-    background: #f7f0df;
-    color: #000000;
-}
+        .header {
+            background: #741f2b;
+            color: white;
 
+            padding: 20px 40px;
 
-/* Header */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-.header {
-    background: #741f2b;
-    color: white;
+        .header h1 {
+            font-size: 24px;
+        }
 
-    padding: 20px 40px;
+        .back {
+            background: #fffdf7;
+            color: #741f2b;
 
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+            height: 37px;
+            padding: 0 15px;
 
-.header h1 {
-    font-size: 24px;
-}
+            border-radius: 5px;
 
-.back {
-    background: #fffdf7;
-    color: #741f2b;
+            text-decoration: none;
+            font-weight: 500;
 
-    height: 37px;
-    padding: 0 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    border-radius: 5px;
+        .back:hover {
+            background: #f3e8d2;
+        }
 
-    text-decoration: none;
-    font-weight: 500;
+        .container {
+            padding: 40px;
+        }
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        .page-title {
+            margin-bottom: 25px;
+        }
 
-.back:hover {
-    background: #f3e8d2;
-}
+        .page-title h2 {
+            margin-bottom: 8px;
+        }
 
+        .page-title p {
+            color: #333333;
+        }
 
-/* Main Container */
+        .controls {
+            background: #fffdf7;
 
-.container {
-    padding: 40px;
-}
+            padding: 25px;
 
+            border-radius: 10px;
 
-/* Page Title */
+            border: 1px solid #eadfc9;
 
-.page-title {
-    margin-bottom: 25px;
-}
+            box-shadow: 0 3px 10px rgba(75, 20, 20, 0.12);
 
-.page-title h2 {
-    margin-bottom: 8px;
-}
+            margin-bottom: 25px;
+        }
 
-.page-title p {
-    color: #333333;
-}
+        .controls label {
+            display: block;
 
+            margin-bottom: 8px;
 
-/* Course Selection */
+            font-size: 14px;
 
-.controls {
-    background: #fffdf7;
+            font-weight: bold;
+        }
 
-    padding: 25px;
+        .controls select {
+            width: 300px;
 
-    border-radius: 10px;
+            padding: 11px;
 
-    border: 1px solid #eadfc9;
+            border: 1px solid #d8cdb8;
 
-    box-shadow: 0 3px 10px rgba(75, 20, 20, 0.12);
+            border-radius: 6px;
 
-    margin-bottom: 25px;
-}
+            background: white;
+        }
 
-.controls label {
-    display: block;
+        .message {
+            background: #d4edda;
 
-    margin-bottom: 8px;
+            color: #155724;
 
-    font-size: 14px;
+            border: 1px solid #c3e6cb;
 
-    font-weight: bold;
-}
+            padding: 12px;
 
-.controls select {
-    width: 300px;
+            border-radius: 6px;
 
-    padding: 11px;
+            margin-bottom: 20px;
+        }
 
-    border: 1px solid #d8cdb8;
+        .student-card {
+            background: #fffdf7;
 
-    border-radius: 6px;
+            padding: 20px;
 
-    background: white;
+            margin-bottom: 15px;
 
-    color: #000000;
+            border-radius: 10px;
 
-    font-size: 14px;
-}
+            border: 1px solid #eadfc9;
 
-.controls select:focus {
-    outline: none;
+            box-shadow: 0 3px 10px rgba(75, 20, 20, 0.12);
 
-    border-color: #741f2b;
-}
+            display: flex;
 
+            justify-content: space-between;
 
-/* Marks Table */
+            align-items: center;
+        }
 
-.table-card {
-    background: #fffdf7;
+        .student-info h3 {
+            color: #741f2b;
 
-    padding: 25px;
+            margin-bottom: 6px;
+        }
 
-    border-radius: 10px;
+        .student-info p {
+            font-size: 14px;
 
-    border: 1px solid #eadfc9;
+            margin-bottom: 4px;
+        }
 
-    box-shadow: 0 3px 10px rgba(75, 20, 20, 0.12);
+        .mark-area {
+            display: flex;
 
-    overflow-x: auto;
-}
+            align-items: center;
 
-table {
-    width: 100%;
+            gap: 12px;
+        }
 
-    border-collapse: collapse;
-}
+        .mark-input {
+            width: 100px;
 
-th {
-    background: #741f2b;
+            padding: 9px;
 
-    color: white;
+            border: 1px solid #d8cdb8;
 
-    padding: 13px;
+            border-radius: 5px;
+        }
 
-    text-align: left;
+        .grade {
+            font-weight: bold;
 
-    font-size: 14px;
-}
+            color: #741f2b;
 
-td {
-    padding: 14px;
+            min-width: 40px;
+        }
 
-    border-bottom: 1px solid #eadfc9;
+        .save-btn {
+            margin-top: 10px;
 
-    font-size: 14px;
-}
+            background: #741f2b;
 
+            color: white;
 
-/* Mark Input */
+            border: none;
 
-.mark-input {
-    width: 100px;
+            padding: 12px 25px;
 
-    padding: 9px;
+            border-radius: 5px;
 
-    border: 1px solid #d8cdb8;
+            cursor: pointer;
 
-    border-radius: 5px;
+            font-size: 14px;
+        }
 
-    font-size: 14px;
-}
+        .save-btn:hover {
+            background: #5c1721;
+        }
 
-.mark-input:focus {
-    outline: none;
+        .empty {
+            background: #fffdf7;
 
-    border-color: #741f2b;
-}
+            padding: 30px;
 
+            border-radius: 10px;
 
-/* Grade */
+            border: 1px solid #eadfc9;
 
-.grade {
-    font-weight: bold;
+            color: #555555;
+        }
 
-    color: #741f2b;
-}
+        @media (max-width: 700px) {
 
+            .container {
+                padding: 25px;
+            }
 
-/* Empty Table */
+            .controls select {
+                width: 100%;
+            }
 
-.empty-row {
-    text-align: center;
+            .student-card {
+                flex-direction: column;
 
-    color: #555555;
+                align-items: flex-start;
 
-    padding: 35px;
-}
+                gap: 15px;
+            }
 
-
-/* Save Button */
-
-.save-btn {
-    margin-top: 20px;
-
-    background: #741f2b;
-
-    color: white;
-
-    border: none;
-
-    padding: 11px 20px;
-
-    border-radius: 5px;
-
-    cursor: pointer;
-
-    font-size: 14px;
-}
-
-.save-btn:hover {
-    background: #5c1721;
-}
-
-
-/* Responsive */
-
-@media (max-width: 700px) {
-
-    .header {
-        padding: 20px;
-    }
-
-    .container {
-        padding: 25px;
-    }
-
-    .controls select {
-        width: 100%;
-    }
-
-}
-
-</style>
+        }
+    </style>
 
 </head>
-
 
 <body>
 
 
-<!-- Header -->
+    <div class="header">
 
-<div class="header">
+        <h1>Marks</h1>
 
-    <h1>Marks</h1>
-
-    <a href="teacher.php" class="back">
-        Back to Dashboard
-    </a>
-
-</div>
-
-
-<!-- Main Content -->
-
-<div class="container">
-
-
-    <!-- Page Title -->
-
-    <div class="page-title">
-
-        <h2>Student Marks</h2>
-
-        <p>
-            Enter marks out of 100 for students enrolled in your course.
-        </p>
+        <a href="teacher.php" class="back">
+            Back to Dashboard
+        </a>
 
     </div>
 
 
-    <!-- Course Selection -->
+    <div class="container">
 
-    <div class="controls">
 
-        <label>
-            Select Course
-        </label>
+        <div class="page-title">
 
-        <select>
+            <h2>
+                Student Marks
+            </h2>
 
-            <option value="">
-                Select Course
-            </option>
+            <p>
+                Enter marks out of 100 for students enrolled in your course.
+            </p>
 
-            <!--
-                Courses assigned to the teacher
-                will be loaded from the database later.
-            -->
+        </div>
 
-        </select>
+
+        <?php if (!empty($message)): ?>
+
+            <div class="message">
+
+                <?php
+
+                echo htmlspecialchars(
+                    $message
+                );
+
+                ?>
+
+            </div>
+
+        <?php endif; ?>
+
+
+        <div class="controls">
+
+            <form method="GET">
+
+                <label>
+                    Select Course
+                </label>
+
+
+                <select name="course_id" onchange="this.form.submit()" required>
+
+                    <option value="">
+                        Select Course
+                    </option>
+
+
+                    <?php while (
+                        $course =
+                        $courses->fetch_assoc()
+                    ): ?>
+
+                        <option value="<?php
+                        echo htmlspecialchars(
+                            $course["course_id"]
+                        );
+                        ?>" <?php
+
+                        if (
+                            $selected_course ===
+                            $course["course_id"]
+                        ) {
+                            echo "selected";
+                        }
+
+                        ?>>
+
+                            <?php
+
+                            echo htmlspecialchars(
+                                $course["course_code"]
+                                . " - "
+                                . $course["course_name"]
+                            );
+
+                            ?>
+
+                        </option>
+
+                    <?php endwhile; ?>
+
+                </select>
+
+            </form>
+
+        </div>
+
+
+        <?php if ($students !== false): ?>
+
+
+            <?php if ($students->num_rows > 0): ?>
+
+
+                <form method="POST">
+
+                    <input type="hidden" name="course_id" value="<?php
+                    echo htmlspecialchars(
+                        $selected_course
+                    );
+                    ?>">
+
+
+                    <?php while (
+                        $student =
+                        $students->fetch_assoc()
+                    ): ?>
+
+
+                        <?php
+
+                        $username =
+                            $student["username"];
+
+
+                        $current_mark =
+                            $existing_marks[
+                                $username
+                            ]["marks"] ?? "";
+
+
+                        $current_grade =
+                            $existing_marks[
+                                $username
+                            ]["grade"] ?? "";
+
+                        ?>
+
+
+                        <div class="student-card">
+
+
+                            <div class="student-info">
+
+                                <h3>
+
+                                    <?php
+
+                                    echo htmlspecialchars(
+                                        $student["name"]
+                                    );
+
+                                    ?>
+
+                                </h3>
+
+
+                                <p>
+
+                                    Student ID:
+
+                                    <?php
+
+                                    echo htmlspecialchars(
+                                        $student["username"]
+                                    );
+
+                                    ?>
+
+                                </p>
+
+                            </div>
+
+
+                            <div class="mark-area">
+
+
+                                <input class="mark-input" type="number" name="marks[<?php
+                                echo htmlspecialchars(
+                                    $username
+                                );
+                                ?>]" min="0" max="100" step="0.01" value="<?php
+                                echo htmlspecialchars(
+                                    $current_mark
+                                );
+                                ?>" placeholder="0 - 100" oninput="updateGrade(this)">
+
+
+                                <span class="grade">
+
+                                    <?php
+
+                                    echo $current_grade !== ""
+                                        ? htmlspecialchars(
+                                            $current_grade
+                                        )
+                                        : "—";
+
+                                    ?>
+
+                                </span>
+
+
+                            </div>
+
+                        </div>
+
+
+                    <?php endwhile; ?>
+
+
+                    <button type="submit" class="save-btn">
+                        Save Marks
+                    </button>
+
+
+                </form>
+
+
+            <?php else: ?>
+
+
+                <div class="empty">
+
+                    No students are enrolled in this course.
+
+                </div>
+
+
+            <?php endif; ?>
+
+
+        <?php elseif (!empty($selected_course)): ?>
+
+
+            <div class="empty">
+
+                You are not assigned to this course.
+
+            </div>
+
+
+        <?php endif; ?>
+
 
     </div>
 
 
-    <!-- Student Marks -->
+    <script>
 
-    <div class="table-card">
+        function calculateGrade(mark) {
+            if (mark >= 80) {
+                return "A+";
+            }
 
-        <table>
+            if (mark >= 75) {
+                return "A";
+            }
 
-            <thead>
+            if (mark >= 70) {
+                return "A-";
+            }
 
-                <tr>
+            if (mark >= 65) {
+                return "B+";
+            }
 
-                    <th>Student ID</th>
+            if (mark >= 60) {
+                return "B";
+            }
 
-                    <th>Student Name</th>
+            if (mark >= 55) {
+                return "B-";
+            }
 
-                    <th>Marks (Out of 100)</th>
+            if (mark >= 50) {
+                return "C+";
+            }
 
-                    <th>Grade</th>
+            if (mark >= 45) {
+                return "C";
+            }
 
-                </tr>
+            if (mark >= 40) {
+                return "D";
+            }
 
-            </thead>
-
-
-            <tbody>
-
-                <!--
-                    Students enrolled in the selected course
-                    will be loaded from the database later.
-                -->
-
-                <tr>
-
-                    <td colspan="4" class="empty-row">
-                        No students available.
-                    </td>
-
-                </tr>
-
-            </tbody>
-
-        </table>
-
-
-        <button class="save-btn">
-            Save Marks
-        </button>
-
-    </div>
+            return "F";
+        }
 
 
-</div>
+        function updateGrade(input) {
+            let mark = Number(input.value);
+
+            let grade =
+                input.parentElement.querySelector(".grade");
 
 
-<script>
+            if (input.value === "") {
 
-/* Calculate Grade */
+                grade.innerText = "—";
 
-function calculateGrade(mark) {
-
-    if (mark >= 80) {
-        return "A+";
-    }
-
-    else if (mark >= 75) {
-        return "A";
-    }
-
-    else if (mark >= 70) {
-        return "A-";
-    }
-
-    else if (mark >= 65) {
-        return "B+";
-    }
-
-    else if (mark >= 60) {
-        return "B";
-    }
-
-    else if (mark >= 55) {
-        return "B-";
-    }
-
-    else if (mark >= 50) {
-        return "C+";
-    }
-
-    else if (mark >= 45) {
-        return "C";
-    }
-
-    else if (mark >= 40) {
-        return "D";
-    }
-
-    else {
-        return "F";
-    }
-
-}
+                return;
+            }
 
 
-/* Update Grade */
+            if (
+                mark < 0 ||
+                mark > 100
+            ) {
 
-function updateGrade(input) {
+                grade.innerText =
+                    "Invalid";
 
-    let mark = Number(input.value);
+                return;
+            }
 
-    let gradeCell = input.parentElement.nextElementSibling;
 
-    if (input.value === "") {
+            grade.innerText =
+                calculateGrade(mark);
+        }
 
-        gradeCell.innerText = "—";
-
-        return;
-
-    }
-
-    if (mark < 0 || mark > 100) {
-
-        gradeCell.innerText = "Invalid";
-
-        return;
-
-    }
-
-    gradeCell.innerText = calculateGrade(mark);
-
-}
-
-</script>
+    </script>
 
 
 </body>
