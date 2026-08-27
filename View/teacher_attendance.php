@@ -1,182 +1,17 @@
 <?php
 
-session_start();
-
-if (
-    !isset($_SESSION["logged_in"]) ||
-    $_SESSION["logged_in"] !== true ||
-    $_SESSION["role"] !== "teacher"
-) {
-    header("Location: login.php");
-    exit;
-}
-
-include "../Model/db.php";
-
-$database = new db();
-
-$connection = $database->connection();
-
-$teacher_username = $_SESSION["username"];
-
-$message = "";
-
-
-$selected_course =
-    $_GET["course_id"] ??
-    $_POST["course_id"] ??
-    "";
-
-
-$selected_date =
-    $_GET["attendance_date"] ??
-    $_POST["attendance_date"] ??
-    date("Y-m-d");
-
-
-/* ==========================================
-   SAVE ATTENDANCE
-   ========================================== */
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-
-    $course_id =
-        trim($_POST["course_id"] ?? "");
-
-
-    $attendance_date =
-        trim($_POST["attendance_date"] ?? "");
-
-
-    if (
-        empty($course_id) ||
-        empty($attendance_date)
-    ) {
-
-        $message =
-            "Please select a course and date.";
-
-    } elseif (
-        !$database->isTeacherAssignedToCourse(
-            $connection,
-            $teacher_username,
-            $course_id
-        )
-    ) {
-
-        $message =
-            "You are not assigned to this course.";
-
-    } else {
-
-        $attendance_data =
-            $_POST["attendance"] ?? [];
-
-
-        foreach (
-            $attendance_data
-            as $student_username => $status
-        ) {
-
-
-            if (
-                $status !== "present" &&
-                $status !== "absent"
-            ) {
-                continue;
-            }
-
-
-            $database->saveAttendance(
-                $connection,
-                $course_id,
-                $student_username,
-                $attendance_date,
-                $status
-            );
-        }
-
-
-        $message =
-            "Attendance saved successfully.";
-
-
-        $selected_course =
-            $course_id;
-
-
-        $selected_date =
-            $attendance_date;
-    }
-}
-
-
-/* ==========================================
-   GET TEACHER COURSES
-   ========================================== */
-
-$courses =
-    $database->getTeacherCourses(
-        $connection,
-        $teacher_username
-    );
-
-
-/* ==========================================
-   GET STUDENTS
-   ========================================== */
-
-$students = false;
-
-$existing_attendance = [];
-
-
-if (!empty($selected_course)) {
-
-    if (
-        $database->isTeacherAssignedToCourse(
-            $connection,
-            $teacher_username,
-            $selected_course
-        )
-    ) {
-
-
-        $students =
-            $database->getCourseStudents(
-                $connection,
-                $selected_course
-            );
-
-
-        $attendance_result =
-            $database->getAttendance(
-                $connection,
-                $selected_course,
-                $selected_date
-            );
-
-
-        while (
-            $attendance =
-            $attendance_result->fetch_assoc()
-        ) {
-
-            $existing_attendance[
-                $attendance["student_username"]
-            ] =
-                $attendance["status"];
-        }
-    }
-}
+include "../Controller/TeacherAttendanceValidation.php";
 
 ?>
 
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
 
 <head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Attendance - Teacher</title>
 
@@ -196,9 +31,7 @@ if (!empty($selected_course)) {
         .header {
             background: #741f2b;
             color: white;
-
             padding: 20px 40px;
-
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -211,15 +44,11 @@ if (!empty($selected_course)) {
         .back {
             background: #fffdf7;
             color: #741f2b;
-
             height: 37px;
             padding: 0 15px;
-
             border-radius: 5px;
-
             text-decoration: none;
             font-weight: 500;
-
             display: flex;
             align-items: center;
             justify-content: center;
@@ -247,15 +76,10 @@ if (!empty($selected_course)) {
 
         .controls {
             background: #fffdf7;
-
             padding: 25px;
-
             border-radius: 10px;
-
             border: 1px solid #eadfc9;
-
             box-shadow: 0 3px 10px rgba(75, 20, 20, 0.12);
-
             margin-bottom: 25px;
         }
 
@@ -269,64 +93,43 @@ if (!empty($selected_course)) {
 
         .control-group label {
             display: block;
-
             margin-bottom: 8px;
-
             font-size: 14px;
-
             font-weight: bold;
         }
 
         .control-group select,
         .control-group input {
             width: 300px;
-
             padding: 11px;
-
             border: 1px solid #d8cdb8;
-
             border-radius: 6px;
-
             background: white;
         }
 
         .message {
             background: #d4edda;
-
             color: #155724;
-
             border: 1px solid #c3e6cb;
-
             padding: 12px;
-
             border-radius: 6px;
-
             margin-bottom: 20px;
         }
 
-        .student-card {
-            background: #fffdf7;
-
-            padding: 20px;
-
-            margin-bottom: 15px;
-
-            border-radius: 10px;
-
-            border: 1px solid #eadfc9;
-
-            box-shadow: 0 3px 10px rgba(75, 20, 20, 0.12);
-
+        .student-line {
+            padding: 15px 0;
+            border-bottom: 1px solid #d8cdb8;
             display: flex;
-
             justify-content: space-between;
-
             align-items: center;
+        }
+
+        .student-line:first-child {
+            border-top: 1px solid #d8cdb8;
         }
 
         .student-info h3 {
             color: #741f2b;
-
             margin-bottom: 6px;
         }
 
@@ -336,33 +139,23 @@ if (!empty($selected_course)) {
 
         .attendance-options {
             display: flex;
-
             gap: 20px;
-
             align-items: center;
         }
 
         .attendance-options label {
             font-size: 14px;
-
             cursor: pointer;
         }
 
         .save-btn {
-            margin-top: 10px;
-
+            margin-top: 20px;
             background: #741f2b;
-
             color: white;
-
             border: none;
-
             padding: 12px 25px;
-
             border-radius: 5px;
-
             cursor: pointer;
-
             font-size: 14px;
         }
 
@@ -372,13 +165,9 @@ if (!empty($selected_course)) {
 
         .empty {
             background: #fffdf7;
-
             padding: 30px;
-
             border-radius: 10px;
-
             border: 1px solid #eadfc9;
-
             color: #555555;
         }
 
@@ -393,11 +182,9 @@ if (!empty($selected_course)) {
                 width: 100%;
             }
 
-            .student-card {
+            .student-line {
                 flex-direction: column;
-
                 align-items: flex-start;
-
                 gap: 15px;
             }
 
@@ -408,13 +195,11 @@ if (!empty($selected_course)) {
 
 <body>
 
-
     <div class="header">
 
         <h1>
             Attendance
         </h1>
-
 
         <a href="teacher.php" class="back">
             Back to Dashboard
@@ -424,7 +209,6 @@ if (!empty($selected_course)) {
 
 
     <div class="container">
-
 
         <div class="page-title">
 
@@ -444,11 +228,20 @@ if (!empty($selected_course)) {
             <div class="message">
 
                 <?php
+                echo htmlspecialchars($message);
+                ?>
 
-                echo htmlspecialchars(
-                    $message
-                );
+            </div>
 
+        <?php endif; ?>
+
+
+        <?php if (!empty($error)): ?>
+
+            <div class="message">
+
+                <?php
+                echo htmlspecialchars($error);
                 ?>
 
             </div>
@@ -458,9 +251,7 @@ if (!empty($selected_course)) {
 
         <div class="controls">
 
-
             <form method="GET">
-
 
                 <div class="control-group">
 
@@ -468,71 +259,55 @@ if (!empty($selected_course)) {
                         Select Course
                     </label>
 
-
                     <select name="course_id" onchange="this.form.submit()" required>
 
                         <option value="">
                             Select Course
                         </option>
 
-
-                        <?php while (
-                            $course =
-                            $courses->fetch_assoc()
-                        ): ?>
-
+                        <?php foreach ($teacher_courses as $course): ?>
 
                             <option value="<?php
                             echo htmlspecialchars(
                                 $course["course_id"]
                             );
                             ?>" <?php
-
                             if (
                                 $selected_course ===
                                 $course["course_id"]
                             ) {
                                 echo "selected";
                             }
-
                             ?>>
 
                                 <?php
-
                                 echo htmlspecialchars(
                                     $course["course_code"]
                                     . " - "
                                     . $course["course_name"]
                                 );
-
                                 ?>
 
                             </option>
 
-
-                        <?php endwhile; ?>
-
+                        <?php endforeach; ?>
 
                     </select>
 
                 </div>
-
 
             </form>
 
 
             <?php if (!empty($selected_course)): ?>
 
-
                 <form method="GET">
-
 
                     <input type="hidden" name="course_id" value="<?php
                     echo htmlspecialchars(
                         $selected_course
                     );
                     ?>">
-
 
                     <div class="control-group">
 
@@ -540,8 +315,7 @@ if (!empty($selected_course)) {
                             Select Date
                         </label>
 
-
-                        <input type="date" name="attendance_date" value="<?php
+                        <input type="date" name="date" value="<?php
                         echo htmlspecialchars(
                             $selected_date
                         );
@@ -549,186 +323,153 @@ if (!empty($selected_course)) {
 
                     </div>
 
-
                 </form>
 
-
             <?php endif; ?>
-
 
         </div>
 
 
-        <?php if ($students !== false): ?>
+        <?php if (
+            $selected_course !== "" &&
+            !empty($students)
+        ): ?>
+
+            <form method="POST">
+
+                <input type="hidden" name="course_id" value="<?php
+                echo htmlspecialchars(
+                    $selected_course
+                );
+                ?>">
+
+                <input type="hidden" name="date" value="<?php
+                echo htmlspecialchars(
+                    $selected_date
+                );
+                ?>">
 
 
-            <?php if ($students->num_rows > 0): ?>
+                <?php foreach ($students as $student): ?>
 
+                    <?php
 
-                <form method="POST">
+                    $student_username =
+                        $student["username"];
 
+                    $current_status = "absent";
 
-                    <input type="hidden" name="course_id" value="<?php
-                    echo htmlspecialchars(
-                        $selected_course
-                    );
-                    ?>">
-
-
-                    <input type="hidden" name="attendance_date" value="<?php
-                    echo htmlspecialchars(
-                        $selected_date
-                    );
-                    ?>">
-
-
-                    <?php while (
-                        $student =
-                        $students->fetch_assoc()
-                    ): ?>
-
-
-                        <?php
-
-                        $username =
-                            $student["username"];
-
-
+                    if (
+                        isset(
+                        $attendance[
+                            $student_username
+                        ]
+                    )
+                    ) {
                         $current_status =
-                            $existing_attendance[
-                                $username
-                            ] ?? "";
+                            $attendance[
+                                $student_username
+                            ]["status"];
+                    }
 
-                        ?>
-
-
-                        <div class="student-card">
+                    ?>
 
 
-                            <div class="student-info">
+                    <div class="student-line">
 
-                                <h3>
+                        <div class="student-info">
 
-                                    <?php
+                            <h3>
 
-                                    echo htmlspecialchars(
-                                        $student["name"]
-                                    );
+                                <?php
+                                echo htmlspecialchars(
+                                    $student["name"]
+                                );
+                                ?>
 
-                                    ?>
+                            </h3>
 
-                                </h3>
+                            <p>
 
+                                Student ID:
 
-                                <p>
+                                <?php
+                                echo htmlspecialchars(
+                                    $student_username
+                                );
+                                ?>
 
-                                    Student ID:
-
-                                    <?php
-
-                                    echo htmlspecialchars(
-                                        $student["username"]
-                                    );
-
-                                    ?>
-
-                                </p>
-
-                            </div>
-
-
-                            <div class="attendance-options">
-
-
-                                <label>
-
-                                    <input type="radio" name="attendance[<?php
-                                    echo htmlspecialchars(
-                                        $username
-                                    );
-                                    ?>]" value="present" <?php
-
-                                    if (
-                                        $current_status ===
-                                        "present"
-                                    ) {
-                                        echo "checked";
-                                    }
-
-                                    ?> required>
-
-                                    Present
-
-                                </label>
-
-
-                                <label>
-
-                                    <input type="radio" name="attendance[<?php
-                                    echo htmlspecialchars(
-                                        $username
-                                    );
-                                    ?>]" value="absent" <?php
-
-                                    if (
-                                        $current_status ===
-                                        "absent"
-                                    ) {
-                                        echo "checked";
-                                    }
-
-                                    ?>>
-
-                                    Absent
-
-                                </label>
-
-
-                            </div>
-
+                            </p>
 
                         </div>
 
 
-                    <?php endwhile; ?>
+                        <div class="attendance-options">
+
+                            <label>
+
+                                <input type="radio" name="attendance[<?php
+                                echo htmlspecialchars(
+                                    $student_username
+                                );
+                                ?>]" value="present" <?php
+                                if (
+                                    $current_status ===
+                                    "present"
+                                ) {
+                                    echo "checked";
+                                }
+                                ?>
+                                    required>
+
+                                Present
+
+                            </label>
 
 
-                    <button type="submit" class="save-btn">
-                        Save Attendance
-                    </button>
+                            <label>
+
+                                <input type="radio" name="attendance[<?php
+                                echo htmlspecialchars(
+                                    $student_username
+                                );
+                                ?>]" value="absent" <?php
+                                if (
+                                    $current_status ===
+                                    "absent"
+                                ) {
+                                    echo "checked";
+                                }
+                                ?>>
+
+                                Absent
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                <?php endforeach; ?>
 
 
-                </form>
+                <button type="submit" class="save-btn">
+                    Save Attendance
+                </button>
+
+            </form>
 
 
-            <?php else: ?>
-
-
-                <div class="empty">
-
-                    No students are enrolled in this course.
-
-                </div>
-
-
-            <?php endif; ?>
-
-
-        <?php elseif (!empty($selected_course)): ?>
-
+        <?php elseif ($selected_course !== ""): ?>
 
             <div class="empty">
-
-                You are not assigned to this course.
-
+                No students are enrolled in this course.
             </div>
-
 
         <?php endif; ?>
 
 
     </div>
-
 
 </body>
 

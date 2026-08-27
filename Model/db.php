@@ -220,13 +220,8 @@ class db
     }
 
 
-    function saveMark(
-        $connection,
-        $course_id,
-        $student_username,
-        $marks,
-        $grade
-    ) {
+    function saveMark($connection, $course_id, $student_username, $marks, $grade)
+    {
         $stmt = $connection->prepare(
             "INSERT INTO marks
         (course_id, student_username, marks, grade)
@@ -254,30 +249,27 @@ class db
 
     function getMarks($connection, $course_id)
     {
-        $stmt = $connection->prepare(
-            "SELECT student_username, marks, grade
-         FROM marks
-         WHERE course_id = ?"
-        );
+        $sql = "SELECT * FROM marks
+            WHERE course_id = ?";
 
-        $stmt->bind_param(
-            "s",
-            $course_id
-        );
-
+        $stmt = $connection->prepare($sql);
+        $stmt->bind_param("s", $course_id);
         $stmt->execute();
 
-        return $stmt->get_result();
+        $result = $stmt->get_result();
+
+        $marks = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $marks[$row["student_username"]] = $row;
+        }
+
+        return $marks;
     }
 
 
-    function saveAttendance(
-        $connection,
-        $course_id,
-        $student_username,
-        $attendance_date,
-        $status
-    ) {
+    function saveAttendance($connection, $course_id, $student_username, $attendance_date, $status)
+    {
         $stmt = $connection->prepare(
             "INSERT INTO attendance
         (course_id, student_username, date, status)
@@ -302,27 +294,25 @@ class db
     }
 
 
-    function getAttendance(
-        $connection,
-        $course_id,
-        $attendance_date
-    ) {
-        $stmt = $connection->prepare(
-            "SELECT student_username, status
-         FROM attendance
-         WHERE course_id = ?
-         AND date = ?"
-        );
+    function getAttendance($connection, $course_id, $date)
+    {
+        $sql = "SELECT * FROM attendance
+            WHERE course_id = ?
+            AND date = ?";
 
-        $stmt->bind_param(
-            "ss",
-            $course_id,
-            $attendance_date
-        );
-
+        $stmt = $connection->prepare($sql);
+        $stmt->bind_param("ss", $course_id, $date);
         $stmt->execute();
 
-        return $stmt->get_result();
+        $result = $stmt->get_result();
+
+        $attendance = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $attendance[$row["student_username"]] = $row;
+        }
+
+        return $attendance;
     }
 }
 ?>

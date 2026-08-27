@@ -1,222 +1,17 @@
 <?php
 
-session_start();
-
-if (
-    !isset($_SESSION["logged_in"]) ||
-    $_SESSION["logged_in"] !== true ||
-    $_SESSION["role"] !== "teacher"
-) {
-    header("Location: login.php");
-    exit;
-}
-
-include "../Model/db.php";
-
-$database = new db();
-
-$connection = $database->connection();
-
-$teacher_username = $_SESSION["username"];
-
-$message = "";
-
-$selected_course =
-    $_GET["course_id"] ??
-    $_POST["course_id"] ??
-    "";
-
-
-/* ==========================================
-   GRADE CALCULATION
-   ========================================== */
-
-function calculateGrade($mark)
-{
-    if ($mark >= 80) {
-        return "A+";
-    }
-
-    if ($mark >= 75) {
-        return "A";
-    }
-
-    if ($mark >= 70) {
-        return "A-";
-    }
-
-    if ($mark >= 65) {
-        return "B+";
-    }
-
-    if ($mark >= 60) {
-        return "B";
-    }
-
-    if ($mark >= 55) {
-        return "B-";
-    }
-
-    if ($mark >= 50) {
-        return "C+";
-    }
-
-    if ($mark >= 45) {
-        return "C";
-    }
-
-    if ($mark >= 40) {
-        return "D";
-    }
-
-    return "F";
-}
-
-
-/* ==========================================
-   SAVE MARKS
-   ========================================== */
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-
-    $course_id =
-        trim($_POST["course_id"] ?? "");
-
-
-    if (empty($course_id)) {
-
-        $message =
-            "Please select a course.";
-
-    } elseif (
-        !$database->isTeacherAssignedToCourse(
-            $connection,
-            $teacher_username,
-            $course_id
-        )
-    ) {
-
-        $message =
-            "You are not assigned to this course.";
-
-    } else {
-
-        $marks_data =
-            $_POST["marks"] ?? [];
-
-
-        foreach (
-            $marks_data
-            as $student_username => $mark
-        ) {
-
-            if ($mark === "") {
-                continue;
-            }
-
-
-            $mark = floatval($mark);
-
-
-            if (
-                $mark >= 0 &&
-                $mark <= 100
-            ) {
-
-                $grade =
-                    calculateGrade($mark);
-
-
-                $database->saveMark(
-                    $connection,
-                    $course_id,
-                    $student_username,
-                    $mark,
-                    $grade
-                );
-            }
-        }
-
-
-        $message =
-            "Marks saved successfully.";
-
-
-        $selected_course =
-            $course_id;
-    }
-}
-
-
-/* ==========================================
-   GET TEACHER COURSES
-   ========================================== */
-
-$courses =
-    $database->getTeacherCourses(
-        $connection,
-        $teacher_username
-    );
-
-
-/* ==========================================
-   GET STUDENTS
-   ========================================== */
-
-$students = false;
-
-$existing_marks = [];
-
-
-if (!empty($selected_course)) {
-
-    if (
-        $database->isTeacherAssignedToCourse(
-            $connection,
-            $teacher_username,
-            $selected_course
-        )
-    ) {
-
-        $students =
-            $database->getCourseStudents(
-                $connection,
-                $selected_course
-            );
-
-
-        $marks_result =
-            $database->getMarks(
-                $connection,
-                $selected_course
-            );
-
-
-        while (
-            $mark =
-            $marks_result->fetch_assoc()
-        ) {
-
-            $existing_marks[
-                $mark["student_username"]
-            ] = [
-                "marks" =>
-                    $mark["marks"],
-
-                "grade" =>
-                    $mark["grade"]
-            ];
-        }
-    }
-}
+include "../Controller/TeacherMarksValidation.php";
 
 ?>
 
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
 
 <head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Marks - Teacher</title>
 
@@ -236,9 +31,7 @@ if (!empty($selected_course)) {
         .header {
             background: #741f2b;
             color: white;
-
             padding: 20px 40px;
-
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -251,15 +44,11 @@ if (!empty($selected_course)) {
         .back {
             background: #fffdf7;
             color: #741f2b;
-
             height: 37px;
             padding: 0 15px;
-
             border-radius: 5px;
-
             text-decoration: none;
             font-weight: 500;
-
             display: flex;
             align-items: center;
             justify-content: center;
@@ -287,127 +76,86 @@ if (!empty($selected_course)) {
 
         .controls {
             background: #fffdf7;
-
             padding: 25px;
-
             border-radius: 10px;
-
             border: 1px solid #eadfc9;
-
             box-shadow: 0 3px 10px rgba(75, 20, 20, 0.12);
-
             margin-bottom: 25px;
         }
 
         .controls label {
             display: block;
-
             margin-bottom: 8px;
-
             font-size: 14px;
-
             font-weight: bold;
         }
 
         .controls select {
             width: 300px;
-
             padding: 11px;
-
             border: 1px solid #d8cdb8;
-
             border-radius: 6px;
-
             background: white;
         }
 
         .message {
             background: #d4edda;
-
             color: #155724;
-
             border: 1px solid #c3e6cb;
-
             padding: 12px;
-
             border-radius: 6px;
-
             margin-bottom: 20px;
         }
 
-        .student-card {
-            background: #fffdf7;
-
-            padding: 20px;
-
-            margin-bottom: 15px;
-
-            border-radius: 10px;
-
-            border: 1px solid #eadfc9;
-
-            box-shadow: 0 3px 10px rgba(75, 20, 20, 0.12);
-
+        .student-line {
+            padding: 15px 0;
+            border-bottom: 1px solid #d8cdb8;
             display: flex;
-
             justify-content: space-between;
-
             align-items: center;
+        }
+
+        .student-line:first-child {
+            border-top: 1px solid #d8cdb8;
         }
 
         .student-info h3 {
             color: #741f2b;
-
             margin-bottom: 6px;
         }
 
         .student-info p {
             font-size: 14px;
-
             margin-bottom: 4px;
         }
 
         .mark-area {
             display: flex;
-
             align-items: center;
-
             gap: 12px;
         }
 
         .mark-input {
             width: 100px;
-
             padding: 9px;
-
             border: 1px solid #d8cdb8;
-
             border-radius: 5px;
         }
 
         .grade {
             font-weight: bold;
-
             color: #741f2b;
-
             min-width: 40px;
         }
 
         .save-btn {
-            margin-top: 10px;
-
+            margin-top: 20px;
             background: #741f2b;
-
             color: white;
-
             border: none;
-
             padding: 12px 25px;
-
             border-radius: 5px;
-
             cursor: pointer;
-
             font-size: 14px;
         }
 
@@ -417,13 +165,9 @@ if (!empty($selected_course)) {
 
         .empty {
             background: #fffdf7;
-
             padding: 30px;
-
             border-radius: 10px;
-
             border: 1px solid #eadfc9;
-
             color: #555555;
         }
 
@@ -437,11 +181,9 @@ if (!empty($selected_course)) {
                 width: 100%;
             }
 
-            .student-card {
+            .student-line {
                 flex-direction: column;
-
                 align-items: flex-start;
-
                 gap: 15px;
             }
 
@@ -452,10 +194,11 @@ if (!empty($selected_course)) {
 
 <body>
 
-
     <div class="header">
 
-        <h1>Marks</h1>
+        <h1>
+            Marks
+        </h1>
 
         <a href="teacher.php" class="back">
             Back to Dashboard
@@ -465,7 +208,6 @@ if (!empty($selected_course)) {
 
 
     <div class="container">
-
 
         <div class="page-title">
 
@@ -485,11 +227,20 @@ if (!empty($selected_course)) {
             <div class="message">
 
                 <?php
+                echo htmlspecialchars($message);
+                ?>
 
-                echo htmlspecialchars(
-                    $message
-                );
+            </div>
 
+        <?php endif; ?>
+
+
+        <?php if (!empty($error)): ?>
+
+            <div class="message">
+
+                <?php
+                echo htmlspecialchars($error);
                 ?>
 
             </div>
@@ -505,47 +256,38 @@ if (!empty($selected_course)) {
                     Select Course
                 </label>
 
-
                 <select name="course_id" onchange="this.form.submit()" required>
 
                     <option value="">
                         Select Course
                     </option>
 
-
-                    <?php while (
-                        $course =
-                        $courses->fetch_assoc()
-                    ): ?>
+                    <?php foreach ($teacher_courses as $course): ?>
 
                         <option value="<?php
                         echo htmlspecialchars(
                             $course["course_id"]
                         );
                         ?>" <?php
-
                         if (
                             $selected_course ===
                             $course["course_id"]
                         ) {
                             echo "selected";
                         }
-
                         ?>>
 
                             <?php
-
                             echo htmlspecialchars(
                                 $course["course_code"]
                                 . " - "
                                 . $course["course_name"]
                             );
-
                             ?>
 
                         </option>
 
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
 
                 </select>
 
@@ -554,149 +296,129 @@ if (!empty($selected_course)) {
         </div>
 
 
-        <?php if ($students !== false): ?>
+        <?php if (
+            $selected_course !== "" &&
+            !empty($students)
+        ): ?>
+
+            <form method="POST">
+
+                <input type="hidden" name="course_id" value="<?php
+                echo htmlspecialchars(
+                    $selected_course
+                );
+                ?>">
 
 
-            <?php if ($students->num_rows > 0): ?>
+                <?php foreach ($students as $student): ?>
 
+                    <?php
 
-                <form method="POST">
+                    $student_username =
+                        $student["username"];
 
-                    <input type="hidden" name="course_id" value="<?php
-                    echo htmlspecialchars(
-                        $selected_course
-                    );
-                    ?>">
+                    $current_mark = "";
+                    $current_grade = "";
 
-
-                    <?php while (
-                        $student =
-                        $students->fetch_assoc()
-                    ): ?>
-
-
-                        <?php
-
-                        $username =
-                            $student["username"];
-
+                    if (
+                        isset(
+                        $marks[
+                            $student_username
+                        ]
+                    )
+                    ) {
 
                         $current_mark =
-                            $existing_marks[
-                                $username
-                            ]["marks"] ?? "";
-
+                            $marks[
+                                $student_username
+                            ]["marks"];
 
                         $current_grade =
-                            $existing_marks[
-                                $username
-                            ]["grade"] ?? "";
+                            $marks[
+                                $student_username
+                            ]["grade"];
+                    }
 
-                        ?>
-
-
-                        <div class="student-card">
+                    ?>
 
 
-                            <div class="student-info">
+                    <div class="student-line">
 
-                                <h3>
+                        <div class="student-info">
 
-                                    <?php
+                            <h3>
 
-                                    echo htmlspecialchars(
-                                        $student["name"]
-                                    );
-
-                                    ?>
-
-                                </h3>
-
-
-                                <p>
-
-                                    Student ID:
-
-                                    <?php
-
-                                    echo htmlspecialchars(
-                                        $student["username"]
-                                    );
-
-                                    ?>
-
-                                </p>
-
-                            </div>
-
-
-                            <div class="mark-area">
-
-
-                                <input class="mark-input" type="number" name="marks[<?php
+                                <?php
                                 echo htmlspecialchars(
-                                    $username
+                                    $student["name"]
                                 );
-                                ?>]" min="0" max="100" step="0.01" value="<?php
+                                ?>
+
+                            </h3>
+
+                            <p>
+
+                                Student ID:
+
+                                <?php
                                 echo htmlspecialchars(
-                                    $current_mark
+                                    $student_username
                                 );
-                                ?>" placeholder="0 - 100" oninput="updateGrade(this)">
+                                ?>
 
-
-                                <span class="grade">
-
-                                    <?php
-
-                                    echo $current_grade !== ""
-                                        ? htmlspecialchars(
-                                            $current_grade
-                                        )
-                                        : "—";
-
-                                    ?>
-
-                                </span>
-
-
-                            </div>
+                            </p>
 
                         </div>
 
 
-                    <?php endwhile; ?>
+                        <div class="mark-area">
+
+                            <input class="mark-input" type="number" name="marks[<?php
+                            echo htmlspecialchars(
+                                $student_username
+                            );
+                            ?>]" min="0" max="100" step="0.01" value="<?php
+                            echo htmlspecialchars(
+                                $current_mark
+                            );
+                            ?>" placeholder="0 - 100" oninput="updateGrade(this)">
 
 
-                    <button type="submit" class="save-btn">
-                        Save Marks
-                    </button>
+                            <span class="grade">
+
+                                <?php
+
+                                if ($current_grade !== "") {
+                                    echo htmlspecialchars(
+                                        $current_grade
+                                    );
+                                } else {
+                                    echo "—";
+                                }
+
+                                ?>
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                <?php endforeach; ?>
 
 
-                </form>
+                <button type="submit" class="save-btn">
+                    Save Marks
+                </button>
+
+            </form>
 
 
-            <?php else: ?>
-
-
-                <div class="empty">
-
-                    No students are enrolled in this course.
-
-                </div>
-
-
-            <?php endif; ?>
-
-
-        <?php elseif (!empty($selected_course)): ?>
-
+        <?php elseif ($selected_course !== ""): ?>
 
             <div class="empty">
-
-                You are not assigned to this course.
-
+                No students are enrolled in this course.
             </div>
-
 
         <?php endif; ?>
 
@@ -707,6 +429,7 @@ if (!empty($selected_course)) {
     <script>
 
         function calculateGrade(mark) {
+
             if (mark >= 80) {
                 return "A+";
             }
@@ -748,6 +471,7 @@ if (!empty($selected_course)) {
 
 
         function updateGrade(input) {
+
             let mark = Number(input.value);
 
             let grade =
@@ -762,13 +486,9 @@ if (!empty($selected_course)) {
             }
 
 
-            if (
-                mark < 0 ||
-                mark > 100
-            ) {
+            if (mark < 0 || mark > 100) {
 
-                grade.innerText =
-                    "Invalid";
+                grade.innerText = "Invalid";
 
                 return;
             }
@@ -779,7 +499,6 @@ if (!empty($selected_course)) {
         }
 
     </script>
-
 
 </body>
 
