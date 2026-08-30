@@ -1,0 +1,4 @@
+
+210, JAVA, CCE104, 3, Monday, 09:40AM, 10:50AM
+156, C++, EEE106, 3, Tuesday, 10:40AM, 11:50AM
+297, IEC, EEE103, 1, Wednesday, 01:30PM, 03:00PM
