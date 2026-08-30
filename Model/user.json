@@ -173,5 +173,30 @@
         "username": "course.admin",
         "password": "$2y$10$QImpOHK.SeXZ85tfdtMLsuZ5wI7mqECbiXNFVb.MhIFOVP9MLEZWW",
         "timestamp": 1788041133
+    },
+    {
+        "username": "teacher02",
+        "password": "$2y$10$0vntX0JyL5Eoecne1bOhLe1CfCje3XBBZTJGCmV3cDClBMXuUCgDe",
+        "timestamp": 1788103855
+    },
+    {
+        "username": "fuad",
+        "password": "$2y$10$hDv.V7iB4cc74TJAn87Nn.APvkKz.KPLP85Upvu8A7\/lSCJ2b7Lc2",
+        "timestamp": 1788103902
+    },
+    {
+        "username": "course.admin",
+        "password": "$2y$10$dtM9WcvgCSy\/k8tFsI1fX.n7zEvSA8rUvPjP4F1w1qps8sLsFV2qO",
+        "timestamp": 1788103922
+    },
+    {
+        "username": "admin",
+        "password": "$2y$10$IOAys9XonK\/uorvMiwMLteP9VxWZXVrPuvM3RNb3Nnwj12huRpAcC",
+        "timestamp": 1788103945
+    },
+    {
+        "username": "teacher02",
+        "password": "$2y$10$EnDFI.Q9HHu8o8uhw\/paN.T40r8uO7ukeTXbCGn4rYXBIQEIeIKau",
+        "timestamp": 1788104024
     }
 ]

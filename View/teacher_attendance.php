@@ -23,9 +23,16 @@ include "../Controller/TeacherAttendanceValidation.php";
             font-family: Arial, sans-serif;
         }
 
+        html, body {
+            height: 100%;
+        }
+
         body {
             background: #f7f0df;
             color: #000000;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         .header {
@@ -169,6 +176,16 @@ include "../Controller/TeacherAttendanceValidation.php";
             border-radius: 10px;
             border: 1px solid #eadfc9;
             color: #555555;
+        }
+
+        .footer {
+            background: #741f2b;
+            color: #fffdf7;
+            text-align: center;
+            padding: 15px 20px;
+            font-size: 14px;
+            margin-top: auto;
+            width: 100%;
         }
 
         @media (max-width: 700px) {
@@ -469,6 +486,12 @@ include "../Controller/TeacherAttendanceValidation.php";
         <?php endif; ?>
 
 
+    </div>
+
+    <div class="footer">
+        <p>
+            &copy; <?php echo date("Y"); ?> University Portal. All Rights Reserved.
+        </p>
     </div>
 
 </body>
