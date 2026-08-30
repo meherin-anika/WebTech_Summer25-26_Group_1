@@ -21,6 +21,7 @@ body { background: #f7f0df; color: #000000; display: flex; flex-direction: colum
 .header h1 { font-size: 24px; }
 .back { background: #fffdf7; color: #741f2b; height: 37px; padding: 0 15px; border-radius: 5px; text-decoration: none; font-weight: 500; display: flex; align-items: center; justify-content: center; }
 .back:hover { background: #f3e8d2; }
+.header-actions { display: flex; gap: 10px; }
 .container { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; gap: 30px; }
 .box { width: 100%; max-width: 600px; background: #fffdf7; padding: 30px 40px; border-radius: 10px; border: 1px solid #eadfc9; box-shadow: 0 5px 20px rgba(75, 20, 20, 0.12); }
 .box h2 { color: #741f2b; text-align: center; font-size: 24px; margin-bottom: 8px; }
@@ -57,7 +58,10 @@ button:hover { background: #5c1721; }
 
 <div class="header">
     <h1>Course Management</h1>
-    <a href="course_admin.php" class="back">Back to Dashboard</a>
+    <div class="header-actions">
+        <a href="course_upload.php" class="back">Upload Courses</a>
+        <a href="course_admin.php" class="back">Back to Dashboard</a>
+    </div>
 </div>
 
 <div class="container">

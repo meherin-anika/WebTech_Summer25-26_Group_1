@@ -1,249 +1,198 @@
+<?php
+include "../Controller/StudentCoursesValidation.php";
+?>
+
 <!DOCTYPE html>
 <html>
 
 <head>
 
-<title>My Courses - Student</title>
+    <title>My Courses - Student</title>
 
-<style>
+    <style>
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
 
-body {
-    background: #f7f0df;
-    color: #000000;
-}
+        html, body {
+            height: 100%;
+        }
 
+        body {
+            background: #f7f0df;
+            color: #000000;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-/* Header */
+        .header {
+            background: #741f2b;
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-.header {
-    background: #741f2b;
-    color: white;
+        .header h1 {
+            font-size: 24px;
+        }
 
-    padding: 20px 40px;
+        .back {
+            background: #fffdf7;
+            color: #741f2b;
+            height: 37px;
+            padding: 0 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+        .back:hover {
+            background: #f3e8d2;
+        }
 
-.header h1 {
-    font-size: 24px;
-}
+        .container {
+            width: 750px;
+            margin: 40px auto;
+            background: #fffdf7;
+            border: 1px solid #eadfc9;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(75, 20, 20, 0.12);
+            padding: 40px;
+        }
 
+        .page-title {
+            margin-bottom: 25px;
+        }
 
-/* Back to Dashboard */
+        .page-title h2 {
+            margin-bottom: 8px;
+            color: #741f2b;
+            font-size: 22px;
+        }
 
-.back {
-    background: #fffdf7;
-    color: #741f2b;
+        .page-title p {
+            color: #333333;
+            font-size: 14px;
+        }
 
-    height: 37px;
-    padding: 0 15px;
+        .text-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
 
-    border-radius: 5px;
+        .item-block {
+            padding-bottom: 14px;
+            border-bottom: 1px solid #eadfc9;
+            font-size: 14px;
+            line-height: 1.6;
+        }
 
-    text-decoration: none;
-    font-weight: 500;
+        .item-block:last-child {
+            border-bottom: none;
+        }
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        .item-block strong {
+            color: #741f2b;
+        }
 
-.back:hover {
-    background: #f3e8d2;
-}
+        .empty-msg {
+            color: #555555;
+            padding: 10px 0;
+            font-size: 14px;
+        }
 
+        .footer {
+            background: #741f2b;
+            color: #fffdf7;
+            text-align: center;
+            padding: 15px 20px;
+            font-size: 14px;
+            margin-top: auto;
+            width: 100%;
+        }
 
-/* Main Container */
-
-.container {
-    padding: 40px;
-}
-
-
-/* Page Title */
-
-.page-title {
-    margin-bottom: 25px;
-}
-
-.page-title h2 {
-    margin-bottom: 8px;
-}
-
-.page-title p {
-    color: #333333;
-}
-
-
-/* Course Table */
-
-.table-card {
-    background: #fffdf7;
-
-    padding: 25px;
-
-    border-radius: 10px;
-
-    border: 1px solid #eadfc9;
-
-    box-shadow: 0 3px 10px rgba(75, 20, 20, 0.12);
-
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-
-    border-collapse: collapse;
-}
-
-th {
-    background: #741f2b;
-
-    color: white;
-
-    padding: 13px;
-
-    text-align: left;
-
-    font-size: 14px;
-}
-
-td {
-    padding: 16px;
-
-    border-bottom: 1px solid #eadfc9;
-
-    font-size: 14px;
-}
-
-
-/* No Data */
-
-.empty-row {
-    text-align: center;
-
-    color: #555555;
-
-    padding: 35px;
-}
-
-
-/* Responsive */
-
-@media (max-width: 800px) {
-
-    .header {
-        padding: 20px;
-    }
-
-    .container {
-        padding: 25px;
-    }
-
-}
-
-</style>
+    </style>
 
 </head>
 
-
 <body>
 
+    <div class="header">
 
-<!-- Header -->
+        <h1>My Courses</h1>
 
-<div class="header">
+        <a href="student.php" class="back">Back to Dashboard</a>
 
-    <h1>My Courses</h1>
+    </div>
 
-    <a href="student.php" class="back">
-        Back to Dashboard
-    </a>
+    <div class="container">
 
-</div>
+        <div class="page-title">
 
+            <h2>My Enrolled Courses</h2>
+            <p>View the courses you are currently enrolled in.</p>
 
-<!-- Main Content -->
+        </div>
+        <div class="text-list">
 
-<div class="container">
+            <?php
+            if (!empty($enrolled_courses))
+                {
+                foreach ($enrolled_courses as $course)
+                    {
+                    echo "<div class='item-block'>";
 
+                    echo "<p>";
+                    echo "<strong>Course:</strong> ";
+                    echo htmlspecialchars($course['course_code'] . " - " . $course['course_name']);
+                    echo " (ID: " . htmlspecialchars($course['course_id']) . ")";
+                    echo "</p>";
 
-    <!-- Page Title -->
+                    echo "<p>";
+                    echo "<strong>Credit:</strong> ";
+                    echo htmlspecialchars($course['credit']);
+                    echo " | ";
 
-    <div class="page-title">
+                    echo "<strong>Schedule:</strong> ";
+                    echo htmlspecialchars($course['day']);
+                    echo ", ";
+                    echo htmlspecialchars($course['start_time'] . " - " . $course['end_time']);
+                    echo "</p>";
 
-        <h2>My Enrolled Courses</h2>
+                    echo "</div>";
+                }
+
+            } else
+            {
+                echo "<p class='empty-msg'>";
+                echo "No enrolled courses available.";
+                echo "</p>";
+            }
+
+            ?>
+
+        </div>
+
+    </div>
+
+    <div class="footer">
 
         <p>
-            View the courses you are currently enrolled in.
+            &copy; <?php echo date("Y"); ?> University Portal. All Rights Reserved.
         </p>
 
     </div>
-
-
-    <!-- Course Table -->
-
-    <div class="table-card">
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>Course ID</th>
-
-                    <th>Course Name</th>
-
-                    <th>Course Code</th>
-
-                    <th>Credit</th>
-
-                    <th>Class Week(s)</th>
-
-                    <th>Class Time</th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-                <!--
-                    Only courses in which the student is enrolled
-                    will be shown here.
-
-                    Course information will come from the database later.
-                -->
-
-                <tr>
-
-                    <td colspan="6" class="empty-row">
-                        No enrolled courses available.
-                    </td>
-
-                </tr>
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-
-</div>
-
 
 </body>
 

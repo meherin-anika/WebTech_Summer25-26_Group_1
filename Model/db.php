@@ -1,6 +1,6 @@
 <?php
-class db {
-    
+class db{
+
     function connection()
     {
         $db_host = "localhost";
@@ -53,7 +53,6 @@ class db {
         return mysqli_query($connection, $sql);
     }
 
-    // ON DELETE CASCADE in MySQL automatically removes foreign key records when a user is deleted
     function deleteUser($connection, $tablename, $id)
     {
         $sql = "DELETE FROM " . $tablename . " WHERE id = " . intval($id);
@@ -84,11 +83,16 @@ class db {
 
     function createCourse($connection, $course_id, $course_name, $course_code, $credit, $day, $start_time, $end_time)
     {
-        $stmt = $connection->prepare("INSERT INTO courses (course_id, course_name, course_code, credit, day, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssisss", $course_id, $course_name, $course_code, $credit, $day, $start_time, $end_time);
-        $result = $stmt->execute();
-        $stmt->close();
-        return $result;
+        $course_id = mysqli_real_escape_string($connection, $course_id);
+        $course_name = mysqli_real_escape_string($connection, $course_name);
+        $course_code = mysqli_real_escape_string($connection, $course_code);
+        $credit = intval($credit);
+        $day = mysqli_real_escape_string($connection, $day);
+        $start_time = mysqli_real_escape_string($connection, $start_time);
+        $end_time = mysqli_real_escape_string($connection, $end_time);
+
+        $sql = "INSERT INTO courses (course_id, course_name, course_code, credit, day, start_time, end_time) VALUES ('" . $course_id . "', '" . $course_name . "', '" . $course_code . "', " . $credit . ", '" . $day . "', '" . $start_time . "', '" . $end_time . "')";
+        return mysqli_query($connection, $sql);
     }
 
     function getCourses($connection)
@@ -99,55 +103,277 @@ class db {
 
     function getUsersByRole($connection, $role)
     {
-        $sql = "SELECT * FROM users WHERE role = '" . mysqli_real_escape_string($connection, $role) . "' AND status = 'approved'";
+        $role = mysqli_real_escape_string($connection, $role);
+        $sql = "SELECT * FROM users WHERE role = '" . $role . "' AND status = 'approved'";
         return mysqli_query($connection, $sql);
     }
 
     function assignFaculty($connection, $course_id, $faculty_username)
     {
-        // 1. Check if an assignment already exists for this course ID
-        $check = $connection->prepare("SELECT id FROM faculty_assignments WHERE course_id = ?");
-        $check->bind_param("s", $course_id);
-        $check->execute();
-        $res = $check->get_result();
+        $course_id = mysqli_real_escape_string($connection, $course_id);
+        $faculty_username = mysqli_real_escape_string($connection, $faculty_username);
 
-        if ($res && $res->num_rows > 0) {
-            $check->close();
-            // 2. Update existing assignment dynamically
-            $stmt = $connection->prepare("UPDATE faculty_assignments SET faculty_username = ? WHERE course_id = ?");
-            $stmt->bind_param("ss", $faculty_username, $course_id);
-            $result = $stmt->execute();
-            $stmt->close();
-            return $result;
+        $sql = "SELECT * FROM faculty_assignments WHERE course_id = '" . $course_id . "'";
+        $result = mysqli_query($connection, $sql);
+
+        if ($result && mysqli_num_rows($result) > 0) {
+            $sql = "UPDATE faculty_assignments SET faculty_username = '" . $faculty_username . "' WHERE course_id = '" . $course_id . "'";
         } else {
-            $check->close();
-            // 3. Insert new assignment if course has no teacher yet
-            $stmt = $connection->prepare("INSERT INTO faculty_assignments (course_id, faculty_username) VALUES (?, ?)");
-            $stmt->bind_param("ss", $course_id, $faculty_username);
-            $result = $stmt->execute();
-            $stmt->close();
-            return $result;
+            $sql = "INSERT INTO faculty_assignments (course_id, faculty_username) VALUES ('" . $course_id . "', '" . $faculty_username . "')";
         }
+
+        return mysqli_query($connection, $sql);
     }
 
     function enrollStudent($connection, $course_id, $student_username)
     {
-        $check = $connection->prepare("SELECT id FROM student_enrollments WHERE course_id = ? AND student_username = ?");
-        $check->bind_param("ss", $course_id, $student_username);
-        $check->execute();
-        $res = $check->get_result();
-        
-        if ($res->num_rows > 0) {
-            $check->close();
-            return false; // Student is already enrolled
-        }
-        $check->close();
+        $course_id = mysqli_real_escape_string($connection, $course_id);
+        $student_username = mysqli_real_escape_string($connection, $student_username);
 
-        $stmt = $connection->prepare("INSERT INTO student_enrollments (course_id, student_username) VALUES (?, ?)");
-        $stmt->bind_param("ss", $course_id, $student_username);
-        $result = $stmt->execute();
-        $stmt->close();
-        return $result;
+        $sql = "SELECT * FROM student_enrollments WHERE course_id = '" . $course_id . "' AND student_username = '" . $student_username . "'";
+        $result = mysqli_query($connection, $sql);
+
+        if ($result && mysqli_num_rows($result) > 0) {
+            return false;
+        }
+
+        $sql = "INSERT INTO student_enrollments (course_id, student_username) VALUES ('" . $course_id . "', '" . $student_username . "')";
+        return mysqli_query($connection, $sql);
+    }
+
+    function getTeacherCourses($connection, $teacher_username)
+    {
+        $teacher_username = mysqli_real_escape_string($connection, $teacher_username);
+
+        $sql = "SELECT courses.* FROM courses
+                INNER JOIN faculty_assignments
+                ON courses.course_id = faculty_assignments.course_id
+                WHERE faculty_assignments.faculty_username = '" . $teacher_username . "'
+                ORDER BY courses.course_code";
+
+        $result = mysqli_query($connection, $sql);
+        $courses = [];
+
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $courses[] = $row;
+            }
+        }
+
+        return $courses;
+    }
+
+    function isTeacherAssignedToCourse($connection, $teacher_username, $course_id)
+    {
+        $teacher_username = mysqli_real_escape_string($connection, $teacher_username);
+        $course_id = mysqli_real_escape_string($connection, $course_id);
+
+        $sql = "SELECT * FROM faculty_assignments WHERE course_id = '" . $course_id . "' AND faculty_username = '" . $teacher_username . "'";
+        $result = mysqli_query($connection, $sql);
+
+        return $result && mysqli_num_rows($result) > 0;
+    }
+
+    function getCourseStudents($connection, $course_id)
+    {
+        $course_id = mysqli_real_escape_string($connection, $course_id);
+
+        $sql = "SELECT users.username, users.name
+                FROM student_enrollments
+                INNER JOIN users
+                ON student_enrollments.student_username = users.username
+                WHERE student_enrollments.course_id = '" . $course_id . "'
+                AND users.role = 'student'
+                AND users.status = 'approved'
+                ORDER BY users.name";
+
+        $result = mysqli_query($connection, $sql);
+        $students = [];
+
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $students[] = $row;
+            }
+        }
+
+        return $students;
+    }
+
+    function saveMark($connection, $course_id, $student_username, $marks, $grade)
+    {
+        $course_id = mysqli_real_escape_string($connection, $course_id);
+        $student_username = mysqli_real_escape_string($connection, $student_username);
+        $marks = floatval($marks);
+        $grade = mysqli_real_escape_string($connection, $grade);
+
+        $sql = "SELECT * FROM marks WHERE course_id = '" . $course_id . "' AND student_username = '" . $student_username . "'";
+        $result = mysqli_query($connection, $sql);
+
+        if ($result && mysqli_num_rows($result) > 0) {
+            $sql = "UPDATE marks SET marks = " . $marks . ", grade = '" . $grade . "' WHERE course_id = '" . $course_id . "' AND student_username = '" . $student_username . "'";
+        } else {
+            $sql = "INSERT INTO marks (course_id, student_username, marks, grade) VALUES ('" . $course_id . "', '" . $student_username . "', " . $marks . ", '" . $grade . "')";
+        }
+
+        return mysqli_query($connection, $sql);
+    }
+
+    function getMarks($connection, $course_id)
+    {
+        $course_id = mysqli_real_escape_string($connection, $course_id);
+        $sql = "SELECT * FROM marks WHERE course_id = '" . $course_id . "'";
+        $result = mysqli_query($connection, $sql);
+        $marks = [];
+
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $marks[$row["student_username"]] = $row;
+            }
+        }
+
+        return $marks;
+    }
+
+    function saveAttendance($connection, $course_id, $student_username, $attendance_date, $status)
+    {
+        $course_id = mysqli_real_escape_string($connection, $course_id);
+        $student_username = mysqli_real_escape_string($connection, $student_username);
+        $attendance_date = mysqli_real_escape_string($connection, $attendance_date);
+        $status = mysqli_real_escape_string($connection, $status);
+
+        $sql = "SELECT * FROM attendance WHERE course_id = '" . $course_id . "' AND student_username = '" . $student_username . "' AND date = '" . $attendance_date . "'";
+        $result = mysqli_query($connection, $sql);
+
+        if ($result && mysqli_num_rows($result) > 0) {
+            $sql = "UPDATE attendance SET status = '" . $status . "' WHERE course_id = '" . $course_id . "' AND student_username = '" . $student_username . "' AND date = '" . $attendance_date . "'";
+        } else {
+            $sql = "INSERT INTO attendance (course_id, student_username, date, status) VALUES ('" . $course_id . "', '" . $student_username . "', '" . $attendance_date . "', '" . $status . "')";
+        }
+
+        return mysqli_query($connection, $sql);
+    }
+
+    function getAttendance($connection, $course_id, $date)
+    {
+        $course_id = mysqli_real_escape_string($connection, $course_id);
+        $date = mysqli_real_escape_string($connection, $date);
+        $sql = "SELECT * FROM attendance WHERE course_id = '" . $course_id . "' AND date = '" . $date . "'";
+        $result = mysqli_query($connection, $sql);
+        $attendance = [];
+
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $attendance[$row["student_username"]] = $row;
+            }
+        }
+
+        return $attendance;
+    }
+
+    function getStudentCourses($connection, $student_username)
+    {
+        $student_username = mysqli_real_escape_string($connection, $student_username);
+
+        $sql = "SELECT courses.* FROM student_enrollments
+                INNER JOIN courses
+                ON student_enrollments.course_id = courses.course_id
+                WHERE student_enrollments.student_username = '" . $student_username . "'
+                ORDER BY courses.course_code";
+
+        $result = mysqli_query($connection, $sql);
+        $courses = [];
+
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $courses[] = $row;
+            }
+        }
+
+        return $courses;
+    }
+
+    function getStudentCourseDetails($connection, $student_username, $course_id)
+    {
+        $student_username = mysqli_real_escape_string($connection, $student_username);
+        $course_id = mysqli_real_escape_string($connection, $course_id);
+
+        $sql = "SELECT courses.*, users.name AS teacher_name, faculty_assignments.faculty_username
+                FROM student_enrollments
+                INNER JOIN courses
+                ON student_enrollments.course_id = courses.course_id
+                LEFT JOIN faculty_assignments
+                ON courses.course_id = faculty_assignments.course_id
+                LEFT JOIN users
+                ON faculty_assignments.faculty_username = users.username
+                WHERE student_enrollments.student_username = '" . $student_username . "'
+                AND courses.course_id = '" . $course_id . "'";
+
+        $result = mysqli_query($connection, $sql);
+
+        if (!$result || mysqli_num_rows($result) == 0) {
+            return null;
+        }
+
+        $course = mysqli_fetch_assoc($result);
+
+        if (empty($course["teacher_name"])) {
+            if (!empty($course["faculty_username"])) {
+                $course["teacher_name"] = $course["faculty_username"];
+            } else {
+                $course["teacher_name"] = "Not Assigned";
+            }
+        }
+
+        return $course;
+    }
+
+    function getStudentAttendanceRecords($connection, $student_username, $course_id)
+    {
+        $student_username = mysqli_real_escape_string($connection, $student_username);
+        $course_id = mysqli_real_escape_string($connection, $course_id);
+
+        $sql = "SELECT date, status FROM attendance
+                WHERE student_username = '" . $student_username . "'
+                AND course_id = '" . $course_id . "'
+                ORDER BY date DESC";
+
+        $result = mysqli_query($connection, $sql);
+        $records = [];
+
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $records[] = $row;
+            }
+        }
+
+        return $records;
+    }
+
+    function getStudentMarks($connection, $student_username)
+    {
+        $student_username = mysqli_real_escape_string($connection, $student_username);
+
+        $sql = "SELECT courses.course_id, courses.course_name, courses.course_code, courses.credit,
+                       marks.marks, marks.grade
+                FROM student_enrollments
+                INNER JOIN courses
+                ON student_enrollments.course_id = courses.course_id
+                LEFT JOIN marks
+                ON student_enrollments.course_id = marks.course_id
+                AND student_enrollments.student_username = marks.student_username
+                WHERE student_enrollments.student_username = '" . $student_username . "'
+                ORDER BY courses.course_code";
+
+        $result = mysqli_query($connection, $sql);
+        $marks = [];
+
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $marks[] = $row;
+            }
+        }
+
+        return $marks;
     }
 }
 ?>
