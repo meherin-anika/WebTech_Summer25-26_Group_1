@@ -1,5 +1,30 @@
 <?php
+<<<<<<< HEAD
 include "../Controller/StudentMarksValidation.php";
+=======
+
+if (session_status() === PHP_SESSION_NONE) 
+    {
+    session_start();
+    }
+
+require_once "../Model/db.php";
+
+$userRole=$_SESSION['user_type'] ?? $_SESSION['role'] ?? $_SESSION['user_role'] ?? '';
+$student_username=$_SESSION['username'] ?? $_SESSION['user'] ?? '';
+
+if (strtolower(trim($userRole)) != "student" || empty($student_username)) 
+    {
+    header("Location: login.php");
+    exit();
+    }
+
+$db=new db();
+$connection=$db->connection();
+
+$marks_records=$db->getStudentMarks($connection, $student_username);
+
+>>>>>>> student
 ?>
 
 <!DOCTYPE html>
@@ -155,30 +180,53 @@ include "../Controller/StudentMarksValidation.php";
 
             <?php
 
+<<<<<<< HEAD
             if (!empty($marks_records)) {
 
                 foreach ($marks_records as $row)
+=======
+            if ($marks_records && $marks_records->num_rows > 0) {
+
+                while ($row = $marks_records->fetch_assoc()) 
+>>>>>>> student
                 {
                     echo "<div class='item-block'>";
 
                     echo "<p>";
                     echo "<strong>Course:</strong> ";
+<<<<<<< HEAD
                     echo htmlspecialchars($row['course_code'] . " - " . $row['course_name']);
                     echo " (ID: " . htmlspecialchars($row['course_id']) . ")";
+=======
+                    echo $row['course_code'] . " - " . $row['course_name'];
+                    echo " (ID: " . $row['course_id'] . ")";
+>>>>>>> student
                     echo "</p>";
 
                     echo "<p>";
                     echo "<strong>Credits:</strong> ";
+<<<<<<< HEAD
                     echo htmlspecialchars($row['credit']);
                     echo " | ";
 
                     echo "<strong>Marks:</strong> ";
                     echo ($row['marks'] !== null) ? htmlspecialchars($row['marks']) : "N/A";
+=======
+                    echo $row['credit'];
+                    echo " | ";
+
+                    echo "<strong>Marks:</strong> ";
+                    echo ($row['marks'] !== null) ? $row['marks'] : "N/A";
+>>>>>>> student
                     echo " | ";
 
                     echo "<strong>Grade:</strong> ";
                     echo "<span class='grade-highlight'>";
+<<<<<<< HEAD
                     echo ($row['grade'] !== null) ? htmlspecialchars($row['grade']) : "N/A";
+=======
+                    echo ($row['grade'] !== null) ? $row['grade'] : "N/A";
+>>>>>>> student
                     echo "</span>";
 
                     echo "</p>";
@@ -186,7 +234,11 @@ include "../Controller/StudentMarksValidation.php";
                     echo "</div>";
                 }
 
+<<<<<<< HEAD
             } else
+=======
+            } else 
+>>>>>>> student
             {
                 echo "<p class='empty-msg'>";
                 echo "No enrolled courses or marks available.";
@@ -210,3 +262,7 @@ include "../Controller/StudentMarksValidation.php";
 </body>
 
 </html>
+<<<<<<< HEAD
+=======
+```
+>>>>>>> student

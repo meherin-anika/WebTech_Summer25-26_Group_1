@@ -1,5 +1,36 @@
 <?php
+<<<<<<< HEAD
 include "../Controller/StudentAttendanceValidation.php";
+=======
+if (session_status() === PHP_SESSION_NONE) 
+    {
+    session_start();
+    }
+
+require_once "../Model/db.php";
+
+$userRole = $_SESSION['user_type'] ?? $_SESSION['role'] ?? $_SESSION['user_role'] ?? '';
+$student_username = $_SESSION['username'] ?? $_SESSION['user'] ?? '';
+
+if (strtolower(trim($userRole)) != "student" || empty($student_username)) 
+    {
+    header("Location: login.php");
+    exit();
+    }
+
+$db=new db();
+$connection=$db->connection();
+
+$enrolled_courses=$db->getStudentEnrolledCourses($connection, $student_username);
+
+$selected_course=$_GET['course_id'] ?? '';
+$attendance_records=false;
+
+if ($selected_course != "") {
+    $attendance_records=$db->getStudentAttendance($connection, $selected_course, $student_username);
+}
+
+>>>>>>> student
 ?>
 
 <!DOCTYPE html>
@@ -128,16 +159,32 @@ include "../Controller/StudentAttendanceValidation.php";
             border-bottom: none;
         }
 
+<<<<<<< HEAD
         .status-present {
+=======
+        .status-Present {
+>>>>>>> student
             color: #155724;
             font-weight: bold;
         }
 
+<<<<<<< HEAD
         .status-absent {
+=======
+        .status-Absent {
+>>>>>>> student
             color: #721c24;
             font-weight: bold;
         }
 
+<<<<<<< HEAD
+=======
+        .status-Late {
+            color: #856404;
+            font-weight: bold;
+        }
+
+>>>>>>> student
         .empty-msg {
             color: #555555;
             padding: 10px 0;
@@ -182,9 +229,15 @@ include "../Controller/StudentAttendanceValidation.php";
 
                     <?php
 
+<<<<<<< HEAD
                     if (!empty($enrolled_courses)) {
 
                         foreach ($enrolled_courses as $course) {
+=======
+                    if ($enrolled_courses && $enrolled_courses->num_rows > 0) {
+
+                        while ($course = $enrolled_courses->fetch_assoc()) {
+>>>>>>> student
 
                             $selected = "";
 
@@ -192,8 +245,13 @@ include "../Controller/StudentAttendanceValidation.php";
                                 $selected = "selected";
                             }
 
+<<<<<<< HEAD
                             echo "<option value='" . htmlspecialchars($course['course_id']) . "' $selected>";
                             echo htmlspecialchars($course['course_code'] . " - " . $course['course_name']);
+=======
+                            echo "<option value='" . $course['course_id'] . "' $selected>";
+                            echo $course['course_code'] . " - " . $course['course_name'];
+>>>>>>> student
                             echo "</option>";
                         }
                     }
@@ -212,33 +270,56 @@ include "../Controller/StudentAttendanceValidation.php";
 
             if ($selected_course != "") {
 
+<<<<<<< HEAD
                 if (!empty($attendance_records)) {
 
                     foreach ($attendance_records as $row)
+=======
+                if ($attendance_records && $attendance_records->num_rows > 0) {
+
+                    while ($row = $attendance_records->fetch_assoc()) 
+>>>>>>> student
                     {
                         echo "<div class='text-row'>";
 
                         echo "<span>";
                         echo "<strong>Date:</strong> ";
+<<<<<<< HEAD
                         echo htmlspecialchars($row['date']);
                         echo "</span>";
 
                         echo "<span class='status-" . htmlspecialchars($row['status']) . "'>";
                         echo "<strong>Status:</strong> ";
                         echo htmlspecialchars(ucfirst($row['status']));
+=======
+                        echo $row['date'];
+                        echo "</span>";
+
+                        echo "<span class='status-" . $row['status'] . "'>";
+                        echo "<strong>Status:</strong> ";
+                        echo $row['status'];
+>>>>>>> student
                         echo "</span>";
 
                         echo "</div>";
                     }
 
+<<<<<<< HEAD
                 } else
+=======
+                } else 
+>>>>>>> student
                 {
                     echo "<p class='empty-msg'>";
                     echo "No attendance records found for this course.";
                     echo "</p>";
                 }
 
+<<<<<<< HEAD
             } else
+=======
+            } else 
+>>>>>>> student
             {
                 echo "<p class='empty-msg'>";
                 echo "Please select a course above to view your attendance.";
@@ -259,4 +340,8 @@ include "../Controller/StudentAttendanceValidation.php";
 
 </body>
 
+<<<<<<< HEAD
 </html>
+=======
+</html>
+>>>>>>> student

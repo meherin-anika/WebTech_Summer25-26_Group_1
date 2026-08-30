@@ -41,7 +41,11 @@
             gap: 10px;
         }
 
+<<<<<<< HEAD
         .logout {
+=======
+        .notification, .logout {
+>>>>>>> student
             width: 110px;
             height: 37px;
             background: #fffdf7;
@@ -56,7 +60,11 @@
             justify-content: center;
         }
 
+<<<<<<< HEAD
         .logout:hover {
+=======
+        .notification:hover, .logout:hover {
+>>>>>>> student
             background: #f3e8d2;
         }
 
@@ -147,6 +155,13 @@
 
         <div class="header-right">
 
+<<<<<<< HEAD
+=======
+            <div class="notification" onclick="notifications()">
+                Notifications
+            </div>
+
+>>>>>>> student
             <a href="login.php" class="logout">
                 Logout
             </a>
@@ -194,6 +209,17 @@
         </p>
 
     </div>
+<<<<<<< HEAD
+=======
+
+    <script>
+
+        function notifications() {
+
+        }
+
+    </script>
+>>>>>>> student
 
 </body>
 

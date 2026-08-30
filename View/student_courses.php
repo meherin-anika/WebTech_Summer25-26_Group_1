@@ -1,5 +1,30 @@
 <?php
+<<<<<<< HEAD
 include "../Controller/StudentCoursesValidation.php";
+=======
+
+if (session_status() === PHP_SESSION_NONE)
+    {
+    session_start();
+    }
+
+require_once "../Model/db.php";
+
+$userRole=$_SESSION['user_type'] ?? $_SESSION['role'] ?? $_SESSION['user_role'] ?? '';
+$student_username=$_SESSION['username'] ?? $_SESSION['user'] ?? '';
+
+if (strtolower(trim($userRole)) != "student" || empty($student_username))
+    {
+    header("Location: login.php");
+    exit();
+    }
+
+$db=new db();
+$connection=$db->connection();
+
+$enrolled_courses=$db->getStudentEnrolledCourses($connection, $student_username);
+
+>>>>>>> student
 ?>
 
 <!DOCTYPE html>
@@ -147,20 +172,32 @@ include "../Controller/StudentCoursesValidation.php";
         <div class="text-list">
 
             <?php
+<<<<<<< HEAD
             if (!empty($enrolled_courses))
                 {
                 foreach ($enrolled_courses as $course)
+=======
+            if ($enrolled_courses && $enrolled_courses->num_rows > 0)
+                {
+                while ($course = $enrolled_courses->fetch_assoc())
+>>>>>>> student
                     {
                     echo "<div class='item-block'>";
 
                     echo "<p>";
                     echo "<strong>Course:</strong> ";
+<<<<<<< HEAD
                     echo htmlspecialchars($course['course_code'] . " - " . $course['course_name']);
                     echo " (ID: " . htmlspecialchars($course['course_id']) . ")";
+=======
+                    echo $course['course_code'] . " - " . $course['course_name'];
+                    echo " (ID: " . $course['course_id'] . ")";
+>>>>>>> student
                     echo "</p>";
 
                     echo "<p>";
                     echo "<strong>Credit:</strong> ";
+<<<<<<< HEAD
                     echo htmlspecialchars($course['credit']);
                     echo " | ";
 
@@ -168,12 +205,25 @@ include "../Controller/StudentCoursesValidation.php";
                     echo htmlspecialchars($course['day']);
                     echo ", ";
                     echo htmlspecialchars($course['start_time'] . " - " . $course['end_time']);
+=======
+                    echo $course['credit'];
+                    echo " | ";
+
+                    echo "<strong>Schedule:</strong> ";
+                    echo $course['day'];
+                    echo ", ";
+                    echo $course['start_time'] . " - " . $course['end_time'];
+>>>>>>> student
                     echo "</p>";
 
                     echo "</div>";
                 }
 
+<<<<<<< HEAD
             } else
+=======
+            } else 
+>>>>>>> student
             {
                 echo "<p class='empty-msg'>";
                 echo "No enrolled courses available.";
