@@ -106,7 +106,7 @@ body {
     width: 380px;
 }
 
-.menu button {
+.menu a {
     width: 100%;
     height: 48px;
     background: #741f2b;
@@ -116,9 +116,13 @@ body {
     cursor: pointer;
     font-size: 15px;
     font-weight: 500;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.menu button:hover {
+.menu a:hover {
     background: #5c1721;
 }
 
@@ -151,18 +155,10 @@ body {
     </div>
 
     <div class="menu">
-        <button onclick="window.location.href='course_management.php'">
-            Manage Courses
-        </button>
-        <button onclick="window.location.href='course_faculty.php'">
-            Assign Faculty
-        </button>
-        <button onclick="window.location.href='course_student.php'">
-            Manage Enrollment
-        </button>
-        <button onclick="window.location.href='edit_profile.php?from=course_admin.php'">
-            Edit Profile
-        </button>
+        <a href="course_management.php" class="button">Manage Courses</a>
+        <a href="course_faculty.php" class="button">Assign Faculty</a>
+        <a href="course_student.php" class="button">Manage Enrollment</a>
+        <a href="edit_profile.php?from=course_admin.php" class="button">Edit Profile</a>
     </div>
 </div>
 

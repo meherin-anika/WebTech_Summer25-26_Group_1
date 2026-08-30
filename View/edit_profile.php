@@ -104,8 +104,8 @@ label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 14px; 
 input { width: 100%; padding: 11px; border: 1px solid #aaa; border-radius: 5px; font-size: 14px; background: white; color: #000000; }
 input:focus { outline: none; border-color: #741f2b; }
 .buttons { display: flex; gap: 10px; margin-top: 5px; }
-button { width: 100%; padding: 12px; background: #741f2b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
-button:hover { background: #5c1721; }
+button, .button { display: block; width: 100%; padding: 12px; background: #741f2b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; text-decoration: none; text-align: center; }
+button:hover, .button:hover { background: #5c1721; }
 .cancel-btn { margin-top: 15px; }
 .error-msg { color: #a00000; background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px; text-align: center; }
 .success-msg { color: #155724; background: #d4edda; border: 1px solid #c3e6cb; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px; text-align: center; }
@@ -169,7 +169,7 @@ button:hover { background: #5c1721; }
                 <?php endif; ?>
             </div>
 
-            <button type="button" class="cancel-btn" onclick="window.location.href='<?php echo htmlspecialchars($backPage); ?>'">Cancel</button>
+            <a class="button cancel-btn" href="<?php echo htmlspecialchars($backPage); ?>">Cancel</a>
         </form>
     </div>
 </div>

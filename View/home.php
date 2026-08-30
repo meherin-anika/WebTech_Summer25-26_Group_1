@@ -53,7 +53,8 @@ body {
     gap: 12px;
 }
 
-button {
+.button {
+    display: block;
     width: 100%;
     padding: 12px;
     background: #741f2b;
@@ -62,9 +63,11 @@ button {
     border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
+    text-decoration: none;
+    text-align: center;
 }
 
-button:hover {
+.button:hover {
     background: #5c1721;
 }
 
@@ -85,15 +88,8 @@ button:hover {
         </p>
 
         <div class="buttons">
-
-            <button onclick="window.location.href='login.php'">
-                Login
-            </button>
-
-            <button onclick="window.location.href='registration.php'">
-                Register
-            </button>
-
+            <a class="button" href="login.php">Login</a>
+            <a class="button" href="registration.php">Register</a>
         </div>
 
     </div>

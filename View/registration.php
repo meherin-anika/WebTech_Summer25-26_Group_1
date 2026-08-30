@@ -18,8 +18,8 @@ include "../Controller/RegistrationValidation.php";
         input, select { width: 100%; padding: 11px; border: 1px solid #aaa; border-radius: 5px; font-size: 14px; background: white; }
         input:focus, select:focus { outline: none; border-color: #741f2b; }
         .buttons { display: flex; gap: 10px; margin-top: 5px; }
-        button { width: 100%; padding: 12px; background: #741f2b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
-        button:hover { background: #5c1721; }
+        button, .button { display: block; width: 100%; padding: 12px; background: #741f2b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; text-decoration: none; text-align: center; }
+        button:hover, .button:hover { background: #5c1721; }
         .link { text-align: center; margin-top: 15px; font-size: 14px; }
         .link a { color: #741f2b; text-decoration: none; font-weight: bold; }
         .link a:hover { text-decoration: underline; }
@@ -110,7 +110,7 @@ include "../Controller/RegistrationValidation.php";
 
             <div class="buttons">
                 <button type="submit">Register</button>
-                <button type="button" onclick="window.location.href='home.php'">Cancel</button>
+                <a class="button" href="home.php">Cancel</a>
             </div>
         </form>
 

@@ -106,7 +106,7 @@ body {
     width: 380px;
 }
 
-.menu button {
+.menu a {
     width: 100%;
     height: 48px;
     background: #741f2b;
@@ -116,9 +116,13 @@ body {
     cursor: pointer;
     font-size: 15px;
     font-weight: 500;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.menu button:hover {
+.menu a:hover {
     background: #5c1721;
 }
 
@@ -151,18 +155,10 @@ body {
     </div>
 
     <div class="menu">
-        <button onclick="window.location.href='create_user.php'">
-            Create Users
-        </button>
-        <button onclick="window.location.href='pending_registrations.php'">
-            Pending Registrations
-        </button>
-        <button onclick="window.location.href='manage_users.php'">
-            Manage Users
-        </button>
-        <button onclick="window.location.href='edit_profile.php?from=admin.php'">
-            Edit Profile
-        </button>
+        <a href="create_user.php" class="button">Create Users</a>
+        <a href="pending_registrations.php" class="button">Pending Registrations</a>
+        <a href="manage_users.php" class="button">Manage Users</a>
+        <a href="edit_profile.php?from=admin.php" class="button">Edit Profile</a>
     </div>
 </div>
 

@@ -106,7 +106,7 @@ body {
     width: 380px;
 }
 
-.menu button {
+.menu a {
     width: 100%;
     height: 48px;
     background: #741f2b;
@@ -116,9 +116,13 @@ body {
     cursor: pointer;
     font-size: 15px;
     font-weight: 500;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.menu button:hover {
+.menu a:hover {
     background: #5c1721;
 }
 
@@ -151,18 +155,10 @@ body {
     </div>
 
     <div class="menu">
-        <button onclick="window.location.href='teacher_courses.php'">
-            My Courses
-        </button>
-        <button onclick="window.location.href='teacher_attendance.php'">
-            Attendance
-        </button>
-        <button onclick="window.location.href='teacher_marks.php'">
-            Marks
-        </button>
-        <button onclick="window.location.href='edit_profile.php?from=teacher.php'">
-            Edit Profile
-        </button>
+        <a href="teacher_courses.php">My Courses</a>
+        <a href="teacher_attendance.php">Attendance</a>
+        <a href="teacher_marks.php">Marks</a>
+        <a href="edit_profile.php?from=teacher.php">Edit Profile</a>
     </div>
 </div>
 

@@ -127,7 +127,7 @@ button:hover { background: #5c1721; }
 
             <div class="buttons">
                 <button type="submit">Create Course</button>
-                <button type="button" onclick="window.location.href='course_admin.php'">Cancel</button>
+                <button type="button" onclick="history.back()">Cancel</button>
             </div>
         </form>
     </div>
