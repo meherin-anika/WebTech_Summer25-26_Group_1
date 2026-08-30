@@ -1,5 +1,33 @@
 [
     {
+        "username": "teacher1",
+        "password": "$2y$10$.H.clTv\/kXeaV7dWgjdk9OpoUliZ\/5byExzEoKILCX85d1by9O7Na",
+        "timestamp": 1787742868
+    },
+    {
+        "username": "student1",
+        "password": "$2y$10$MC6xpCTTiS48oIEeXI78qu3.tUzMb\/cGcRLR942ewidubYL\/eKl1a",
+        "timestamp": 1787743180
+    },
+    {
+        "username": "teacher1",
+        "password": "$2y$10$HnaG3GOq4V5p56omNf4uM.r3yrVBvl0FbjLItzzTM3QQCBt2BuC36",
+        "timestamp": 1787837496
+    },
+    {
+        "username": "teacher1",
+        "password": "$2y$10$OhenY2WAQDmuE1Uuc3rH1ueGRU6u0gBGtEFgjGlCod\/htwJ6j18NG",
+        "timestamp": 1787839897
+    },
+    {
+        "username": "teacher1",
+        "password": "$2y$10$Kin5UDxLEsQqzVtZWbf\/y.rYq99a48aeujyCmdDqVPAB54mSS.x\/q",
+        "timestamp": 1787841163
+    },
+    {
+        "username": "teacher1",
+        "password": "$2y$10$Z4UKnQCVqDIjoBhc0caA5eFh5.EcBKOO0owzuB3Phanek7l0jWi6S",
+        "timestamp": 1787842154
         "username": "admin",
         "password": "$2y$10$kw3MmNcSHEtCb3NClt17VOFQx8a9ZWAFrq80ROQzyiH9U9iArKleW",
         "timestamp": 1788006810
