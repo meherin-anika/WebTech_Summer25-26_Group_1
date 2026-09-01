@@ -5,27 +5,9 @@ include "../Model/db.php";
 $database = new db();
 $connection = $database->connection();
 
-$message = "";
-$message_type = "";
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $course_id = trim($_POST["course_id"] ?? "");
-    $faculty_username = trim($_POST["faculty_username"] ?? "");
-
-    if (empty($course_id) || empty($faculty_username)) {
-        $message = "Please select both a course and a teacher.";
-        $message_type = "error";
-    } else {
-        $assigned = $database->assignFaculty($connection, $course_id, $faculty_username);
-        if ($assigned) {
-            $message = "Faculty successfully assigned to course!";
-            $message_type = "success";
-        } else {
-            $message = "Failed to assign faculty.";
-            $message_type = "error";
-        }
-    }
-}
+$message = $_SESSION['message'] ?? "";
+$message_type = $_SESSION['message_type'] ?? "";
+unset($_SESSION['message'], $_SESSION['message_type']);
 
 $courses = $database->getCourses($connection);
 $teachers = $database->getUsersByRole($connection, "teacher");
@@ -75,7 +57,7 @@ button:hover { background: #5c1721; }
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="course_faculty.php" onsubmit="return validateForm()">
+        <form method="POST" action="../Controller/CourseFacultyValidation.php" onsubmit="return validateForm()">
             <div class="form-group">
                 <label>Select Course</label>
                 <select name="course_id" id="course_id">

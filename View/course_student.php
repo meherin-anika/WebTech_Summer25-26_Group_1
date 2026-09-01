@@ -5,27 +5,9 @@ include "../Model/db.php";
 $database = new db();
 $connection = $database->connection();
 
-$message = "";
-$message_type = "";
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $course_id = trim($_POST["course_id"] ?? "");
-    $student_username = trim($_POST["student_username"] ?? "");
-
-    if (empty($course_id) || empty($student_username)) {
-        $message = "Please select both a course and a student.";
-        $message_type = "error";
-    } else {
-        $enrolled = $database->enrollStudent($connection, $course_id, $student_username);
-        if ($enrolled) {
-            $message = "Student successfully enrolled in course!";
-            $message_type = "success";
-        } else {
-            $message = "Failed to enroll student.";
-            $message_type = "error";
-        }
-    }
-}
+$message = $_SESSION['message'] ?? "";
+$message_type = $_SESSION['message_type'] ?? "";
+unset($_SESSION['message'], $_SESSION['message_type']);
 
 $courses = $database->getCourses($connection);
 $students = $database->getUsersByRole($connection, "student");
@@ -75,7 +57,7 @@ button:hover { background: #5c1721; }
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="course_student.php" onsubmit="return validateForm()">
+        <form method="POST" action="../Controller/CourseStudentValidation.php" onsubmit="return validateForm()">
             <div class="form-group">
                 <label>Select Course</label>
                 <select name="course_id" id="course_id">

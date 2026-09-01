@@ -5,28 +5,9 @@ session_start();
 $database = new db();
 $connection = $database->connection();
 
-$message = "";
-
-if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
-    $delete_id = intval($_GET['id']);
-    
-    $target_user = $database->getUserById($connection, "users", $delete_id);
-    $target_data = $target_user ? $target_user->fetch_assoc() : null;
-
-    if ($target_data && strtolower($target_data['role']) === 'admin') {
-        $_SESSION['error_message'] = "Main Admin accounts cannot be deleted!";
-    } else {
-        $database->deleteUser($connection, "users", $delete_id);
-    }
-    
-    header("Location: manage_users.php");
-    exit();
-}
-
-if (isset($_SESSION['error_message'])) {
-    $message = $_SESSION['error_message'];
-    unset($_SESSION['error_message']);
-}
+$error_message = $_SESSION['error_message'] ?? "";
+$success_message = $_SESSION['success_message'] ?? "";
+unset($_SESSION['error_message'], $_SESSION['success_message']);
 
 $all_users = $database->getAllUsers($connection, "users");
 
@@ -67,11 +48,9 @@ body { background: #f7f0df; color: #000000; display: flex; flex-direction: colum
 .welcome h2 { margin-bottom: 8px; color: #741f2b; }
 .welcome p { color: #333333; }
 
-/* Main Container Box */
 .box { width: 100%; max-width: 800px; background: #fffdf7; padding: 30px 40px; border-radius: 10px; border: 1px solid #eadfc9; box-shadow: 0 5px 20px rgba(75, 20, 20, 0.12); }
 .box h3 { color: #741f2b; margin-bottom: 12px; font-size: 20px; }
 
-/* User List Elements (No cards, no tables) */
 .user-entry { margin-bottom: 18px; line-height: 1.6; }
 .user-entry p { font-size: 15px; color: #333333; }
 .user-entry strong { color: #741f2b; }
@@ -80,6 +59,7 @@ body { background: #f7f0df; color: #000000; display: flex; flex-direction: colum
 .delete-btn:hover { background: #5c1721; }
 
 .error-msg { color: #a00000; background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-bottom: 20px; font-size: 14px; text-align: center; width: 100%; max-width: 800px; }
+.success-msg { color: #155724; background: #d4edda; border: 1px solid #c3e6cb; padding: 10px; border-radius: 5px; margin-bottom: 20px; font-size: 14px; text-align: center; width: 100%; max-width: 800px; }
 .no-users { color: #666; font-style: italic; margin-bottom: 15px; }
 
 .footer { background: #741f2b; color: #fffdf7; text-align: center; padding: 15px 20px; font-size: 14px; margin-top: auto; }
@@ -98,8 +78,12 @@ body { background: #f7f0df; color: #000000; display: flex; flex-direction: colum
         <p>View and manage existing system accounts.</p>
     </div>
 
-    <?php if (!empty($message)): ?>
-        <div class="error-msg"><?php echo htmlspecialchars($message); ?></div>
+    <?php if (!empty($error_message)): ?>
+        <div class="error-msg"><?php echo htmlspecialchars($error_message); ?></div>
+    <?php endif; ?>
+
+    <?php if (!empty($success_message)): ?>
+        <div class="success-msg"><?php echo htmlspecialchars($success_message); ?></div>
     <?php endif; ?>
 
     <div class="box">
@@ -128,7 +112,7 @@ body { background: #f7f0df; color: #000000; display: flex; flex-direction: colum
                 <p><strong>ID:</strong> <?php echo $row['id']; ?> | <strong>Name:</strong> <?php echo htmlspecialchars($row['name']); ?></p>
                 <p><strong>Username:</strong> <?php echo htmlspecialchars($row['username']); ?> | <strong>Password:</strong> <?php echo htmlspecialchars($row['password']); ?></p>
                 <p><strong>Email:</strong> <?php echo htmlspecialchars($row['email']); ?> | <strong>Role:</strong> <?php echo htmlspecialchars(ucfirst($row['role'])); ?></p>
-                <a href="manage_users.php?action=delete&id=<?php echo $row['id']; ?>" class="delete-btn" onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
+                <a href="../Controller/AdminManageUsersValidation.php?action=delete&id=<?php echo $row['id']; ?>" class="delete-btn" onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
             </div>
         <?php 
             endwhile; 

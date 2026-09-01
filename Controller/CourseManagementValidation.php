@@ -1,8 +1,13 @@
 <?php
-session_start();
-include "../Model/db.php";
+// Prevent session re-initialization error
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-if (isset($_GET["action"]) && $_GET["action"] == "check_unique") {
+include_once "../Model/db.php";
+
+// 1. Live AJAX Uniqueness Check
+if (isset($_GET["action"]) && $_GET["action"] === "check_unique") {
     header("Content-Type: application/json");
 
     $database = new db();
@@ -12,12 +17,15 @@ if (isset($_GET["action"]) && $_GET["action"] == "check_unique") {
     $value = trim($_GET["value"] ?? "");
     $response = ["isUnique" => true];
 
-    if ($field == "course_id" && !empty($value)) {
+    if (!empty($value)) {
         $courses = $database->getCourses($connection);
-
         if ($courses) {
             while ($course = mysqli_fetch_assoc($courses)) {
-                if ($course["course_id"] == $value) {
+                if ($field === "course_id" && strcasecmp($course["course_id"], $value) === 0) {
+                    $response["isUnique"] = false;
+                    break;
+                }
+                if ($field === "course_code" && strcasecmp($course["course_code"], $value) === 0) {
                     $response["isUnique"] = false;
                     break;
                 }
@@ -29,14 +37,15 @@ if (isset($_GET["action"]) && $_GET["action"] == "check_unique") {
     exit();
 }
 
+// 2. Controller Definition
 class CourseController
 {
-    function handleCourseCreation()
+    public function handleCourseCreation()
     {
         $message = "";
         $message_type = "";
 
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $course_id = trim($_POST["course_id"] ?? "");
             $course_name = trim($_POST["course_name"] ?? "");
             $course_code = trim($_POST["course_code"] ?? "");
@@ -70,7 +79,7 @@ class CourseController
                     $message = "Course created successfully!";
                     $message_type = "success";
                 } else {
-                    $message = "Failed to create course. Course ID may already exist.";
+                    $message = "Failed to create course. Course ID or Code may already exist.";
                     $message_type = "error";
                 }
             }
@@ -82,7 +91,7 @@ class CourseController
         ];
     }
 
-    function fetchAllCoursesWithDetails()
+    public function fetchAllCoursesWithDetails()
     {
         $database = new db();
         $connection = $database->connection();
@@ -101,11 +110,23 @@ class CourseController
 
         $result = mysqli_query($connection, $sql);
 
-        if ($result == false) {
+        if ($result === false) {
             return $database->getCourses($connection);
         }
 
         return $result;
     }
+}
+
+// 3. Form Submission Endpoint (Executes strictly on form POST)
+if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_GET["action"]) && basename($_SERVER['SCRIPT_FILENAME']) === 'CourseManagementValidation.php') {
+    $controller = new CourseController();
+    $result = $controller->handleCourseCreation();
+
+    $_SESSION['message'] = $result['message'];
+    $_SESSION['message_type'] = $result['message_type'];
+
+    header("Location: ../View/course_management.php");
+    exit();
 }
 ?>

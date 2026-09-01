@@ -178,7 +178,7 @@ include "../Controller/StudentAttendanceValidation.php";
 
                 <select name="course_id" onchange="document.getElementById('attendanceForm').submit()">
 
-                    <option value="">-- Choose a Course --</option>
+                    <option value="">Select a Course</option>
 
                     <?php
 

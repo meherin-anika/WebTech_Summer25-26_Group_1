@@ -6,18 +6,12 @@ $database = new db();
 $connection = $database->connection();
 
 // Determine navigation back link
+$backPage = "admin.php";
 if (isset($_GET["from"])) {
-    if ($_GET["from"] == "course_admin.php") {
-        $backPage = "course_admin.php";
-    } else if ($_GET["from"] == "teacher.php") {
-        $backPage = "teacher.php";
-    } else if ($_GET["from"] == "student.php") {
-        $backPage = "student.php";
-    } else {
-        $backPage = "admin.php";
+    $allowedPages = ["course_admin.php", "teacher.php", "student.php", "admin.php"];
+    if (in_array($_GET["from"], $allowedPages)) {
+        $backPage = $_GET["from"];
     }
-} else {
-    $backPage = "admin.php";
 }
 
 // Fetch currently logged-in user
@@ -25,63 +19,10 @@ $logged_in_username = $_SESSION['username'] ?? '';
 $user_res = $database->CheckUser($connection, "users", $logged_in_username);
 $current_user = ($user_res && $user_res->num_rows > 0) ? $user_res->fetch_assoc() : null;
 
-$message = "";
-$message_type = "";
-
-// Handle Delete Account (Blocked for admin role)
-if (isset($_POST['action']) && $_POST['action'] === 'delete_account' && $current_user) {
-    if ($current_user['role'] === 'admin') {
-        $message = "Main Admin cannot delete their own account.";
-        $message_type = "error";
-    } else {
-        $database->deleteUser($connection, "users", $current_user['id']);
-        session_destroy();
-        header("Location: login.php");
-        exit();
-    }
-}
-
-// Handle Form Submission (Save Changes)
-if ($_SERVER["REQUEST_METHOD"] === "POST" && (!isset($_POST['action']) || $_POST['action'] !== 'delete_account')) {
-    $name = trim($_POST["name"] ?? "");
-    $email = trim($_POST["email"] ?? "");
-    $username = trim($_POST["username"] ?? "");
-    $password = trim($_POST["password"] ?? "");
-    $confirm_password = trim($_POST["confirm_password"] ?? "");
-
-    if (empty($name) || empty($email) || empty($username)) {
-        $message = "Please fill all required fields.";
-        $message_type = "error";
-    } else if (!empty($password) && $password !== $confirm_password) {
-        $message = "Passwords do not match.";
-        $message_type = "error";
-    } else if ($current_user) {
-        // Check if username is taken by another user
-        if ($username !== $current_user['username']) {
-            $check_user = $database->CheckUser($connection, "users", $username);
-            if ($check_user && $check_user->num_rows > 0) {
-                $message = "Username is already taken by another account.";
-                $message_type = "error";
-            }
-        }
-
-        if (empty($message)) {
-            $update_res = $database->updateProfile($connection, "users", $current_user['id'], $name, $email, $username, $password);
-            if ($update_res) {
-                $_SESSION['username'] = $username; // Update session if username changed
-                $message = "Profile updated successfully.";
-                $message_type = "success";
-                
-                // Refresh local user data
-                $user_res = $database->CheckUser($connection, "users", $username);
-                $current_user = $user_res->fetch_assoc();
-            } else {
-                $message = "Failed to update profile. Please try again.";
-                $message_type = "error";
-            }
-        }
-    }
-}
+// Read and clear flash messages from session
+$message = $_SESSION['message'] ?? "";
+$message_type = $_SESSION['message_type'] ?? "";
+unset($_SESSION['message'], $_SESSION['message_type']);
 ?>
 
 <!DOCTYPE html>
@@ -136,7 +77,7 @@ button:hover, .button:hover { background: #5c1721; }
             </div>
         <?php endif; ?>
 
-        <form method="post" id="profileForm" action="edit_profile.php?from=<?php echo urlencode($backPage); ?>" onsubmit="return validateForm()">
+        <form method="post" id="profileForm" action="../Controller/EditProfileValidation.php?from=<?php echo urlencode($backPage); ?>" onsubmit="return validateForm()">
             <div class="form-group">
                 <label>Name</label>
                 <input type="text" name="name" value="<?php echo htmlspecialchars($current_user['name'] ?? ''); ?>" placeholder="Enter name">

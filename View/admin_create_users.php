@@ -1,38 +1,12 @@
 <?php
-include "../Model/db.php";
 session_start();
 
-$message = "";
-$message_type = "";
+$message = $_SESSION['message'] ?? "";
+$message_type = $_SESSION['message_type'] ?? "";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = trim($_POST["name"] ?? "");
-    $email = trim($_POST["email"] ?? "");
-    $username = trim($_POST["username"] ?? "");
-    $password = trim($_POST["password"] ?? "");
-    $confirm_password = trim($_POST["confirm_password"] ?? "");
-    $role = $_POST["role"] ?? "";
-
-    if (empty($name) || empty($email) || empty($username) || empty($password) || empty($role)) {
-        $message = "Please fill all fields.";
-        $message_type = "error";
-    } else if ($password !== $confirm_password) {
-        $message = "Passwords do not match.";
-        $message_type = "error";
-    } else {
-        $database = new db();
-        $connection = $database->connection();
-        $result = $database->createUserDirect($connection, "users", $name, $email, $username, $password, $role);
-
-        if ($result) {
-            $message = "User created successfully!";
-            $message_type = "success";
-        } else {
-            $message = "Creation failed. Try again.";
-            $message_type = "error";
-        }
-    }
-}
+// Clear flash session messages after loading
+unset($_SESSION['message']);
+unset($_SESSION['message_type']);
 ?>
 <!DOCTYPE html>
 <html>
@@ -103,7 +77,7 @@ button:hover { background: #5c1721; }
             </div>
         <?php endif; ?>
 
-        <form method="post" action="" onsubmit="return collect_data()">
+        <form method="post" action="../Controller/AdminCreateUsersValidation.php" onsubmit="return collect_data()">
             <div class="form-group">
                 <label>Name</label>
                 <input type="text" name="name" placeholder="Enter name">
@@ -142,7 +116,7 @@ button:hover { background: #5c1721; }
 
             <div class="buttons">
                 <button type="submit">Create User</button>
-                <button type="button" onclick="history.back()">Cancel</button>
+                <button type="button" onclick="window.location.href='admin.php'">Cancel</button>
             </div>
         </form>
     </div>

@@ -12,7 +12,8 @@ function checkUniqueness(field, value, errorElementId) {
     }
 
     const xhr = new XMLHttpRequest();
-    xhr.open("GET", `../Controller/courseController.php?action=check_unique&field=${field}&value=` + encodeURIComponent(value), true);
+    // Route request directly to CourseManagementValidation.php
+    xhr.open("GET", `../Controller/CourseManagementValidation.php?action=check_unique&field=${field}&value=` + encodeURIComponent(value), true);
     
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {

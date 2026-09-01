@@ -155,9 +155,9 @@ body {
     </div>
 
     <div class="menu">
-        <a href="create_user.php" class="button">Create Users</a>
-        <a href="pending_registrations.php" class="button">Pending Registrations</a>
-        <a href="manage_users.php" class="button">Manage Users</a>
+        <a href="admin_create_users.php" class="button">Create Users</a>
+        <a href="admin_pending_registrations.php" class="button">Pending Registrations</a>
+        <a href="admin_manage_users.php" class="button">Manage Users</a>
         <a href="edit_profile.php?from=admin.php" class="button">Edit Profile</a>
     </div>
 </div>

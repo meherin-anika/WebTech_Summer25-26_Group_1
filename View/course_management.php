@@ -1,11 +1,12 @@
 <?php
-include "../Controller/courseController.php";
+session_start();
+include "../Controller/CourseManagementValidation.php";
 
 $controller = new CourseController();
-$result = $controller->handleCourseCreation();
 
-$message = $result['message'];
-$message_type = $result['message_type'];
+$message = $_SESSION['message'] ?? "";
+$message_type = $_SESSION['message_type'] ?? "";
+unset($_SESSION['message'], $_SESSION['message_type']);
 
 $courses_res = $controller->fetchAllCoursesWithDetails();
 ?>
@@ -52,7 +53,7 @@ button:hover { background: #5c1721; }
 .footer { background: #741f2b; color: #fffdf7; text-align: center; padding: 15px 20px; font-size: 14px; margin-top: auto; }
 </style>
 
-<script src="../JS/courseValidation.js"></script>
+<script src="../JS/CourseValidation.js"></script>
 </head>
 <body>
 
@@ -75,7 +76,7 @@ button:hover { background: #5c1721; }
             </div>
         <?php endif; ?>
 
-        <form id="courseForm" method="POST" action="course_management.php" onsubmit="return validateCourseForm()">
+        <form id="courseForm" method="POST" action="../Controller/CourseManagementValidation.php" onsubmit="return validateCourseForm()">
             <div class="form-group">
                 <label>Course ID <span id="idError" class="validation-msg"></span></label>
                 <input type="text" name="course_id" placeholder="Enter course ID" onkeyup="checkUniqueness('course_id', this.value, 'idError')">

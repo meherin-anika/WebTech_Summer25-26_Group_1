@@ -19,18 +19,29 @@ class db{
 
     function signup($connection, $tablename, $name, $email, $username, $password, $role)
     {
+        $name = mysqli_real_escape_string($connection, $name);
+        $email = mysqli_real_escape_string($connection, $email);
+        $username = mysqli_real_escape_string($connection, $username);
+        $password = mysqli_real_escape_string($connection, $password);
+        $role = mysqli_real_escape_string($connection, $role);
+
         $sql = "INSERT INTO " . $tablename . " (name, email, username, password, role, status) VALUES ('" . $name . "', '" . $email . "', '" . $username . "', '" . $password . "', '" . $role . "', 'pending')";
         return mysqli_query($connection, $sql);
     }
 
     function signin($connection, $tablename, $username, $password)
     {
+        $username = mysqli_real_escape_string($connection, $username);
+        $password = mysqli_real_escape_string($connection, $password);
+
         $sql = "SELECT * FROM " . $tablename . " WHERE username ='" . $username . "' AND password ='" . $password . "' AND status = 'approved'";
         return mysqli_query($connection, $sql);
     }
 
     function CheckUser($connection, $tablename, $username)
     {
+        $username = mysqli_real_escape_string($connection, $username);
+
         $sql = "SELECT * FROM " . $tablename . " WHERE username ='" . $username . "'";
         return mysqli_query($connection, $sql);
     }
@@ -61,6 +72,12 @@ class db{
 
     function createUserDirect($connection, $tablename, $name, $email, $username, $password, $role)
     {
+        $name = mysqli_real_escape_string($connection, $name);
+        $email = mysqli_real_escape_string($connection, $email);
+        $username = mysqli_real_escape_string($connection, $username);
+        $password = mysqli_real_escape_string($connection, $password);
+        $role = mysqli_real_escape_string($connection, $role);
+
         $sql = "INSERT INTO " . $tablename . " (name, email, username, password, role, status) VALUES ('" . $name . "', '" . $email . "', '" . $username . "', '" . $password . "', '" . $role . "', 'approved')";
         return mysqli_query($connection, $sql);
     }
@@ -73,10 +90,16 @@ class db{
 
     function updateProfile($connection, $tablename, $id, $name, $email, $username, $password = "")
     {
+        $id = intval($id);
+        $name = mysqli_real_escape_string($connection, $name);
+        $email = mysqli_real_escape_string($connection, $email);
+        $username = mysqli_real_escape_string($connection, $username);
+
         if (!empty($password)) {
-            $sql = "UPDATE " . $tablename . " SET name='" . $name . "', email='" . $email . "', username='" . $username . "', password='" . $password . "' WHERE id=" . intval($id);
+            $password = mysqli_real_escape_string($connection, $password);
+            $sql = "UPDATE " . $tablename . " SET name='" . $name . "', email='" . $email . "', username='" . $username . "', password='" . $password . "' WHERE id=" . $id;
         } else {
-            $sql = "UPDATE " . $tablename . " SET name='" . $name . "', email='" . $email . "', username='" . $username . "' WHERE id=" . intval($id);
+            $sql = "UPDATE " . $tablename . " SET name='" . $name . "', email='" . $email . "', username='" . $username . "' WHERE id=" . $id;
         }
         return mysqli_query($connection, $sql);
     }

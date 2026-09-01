@@ -5,16 +5,9 @@ session_start();
 $database = new db();
 $connection = $database->connection();
 
-if (isset($_GET['action']) && isset($_GET['id'])) {
-    $id = intval($_GET['id']);
-    if ($_GET['action'] === 'approve') {
-        $database->approveUser($connection, "users", $id);
-    } else if ($_GET['action'] === 'reject') {
-        $database->deleteUser($connection, "users", $id);
-    }
-    header("Location: pending_registrations.php");
-    exit();
-}
+$message = $_SESSION['message'] ?? "";
+$message_type = $_SESSION['message_type'] ?? "";
+unset($_SESSION['message'], $_SESSION['message_type']);
 
 $pending_users = $database->getPendingUsers($connection, "users");
 ?>
@@ -31,11 +24,13 @@ body { background: #f7f0df; color: #000000; display: flex; flex-direction: colum
 .back:hover { background: #f3e8d2; }
 .container { flex: 1; padding: 40px; }
 .welcome { margin-bottom: 25px; }
-.welcome h2 { margin-bottom: 8px; }
+.welcome h2 { margin-bottom: 8px; color: #741f2b; }
 .welcome p { color: #333333; }
 .user-item { margin-bottom: 15px; font-size: 15px; }
 .btn-link { background: #741f2b; color: white; border: none; padding: 4px 10px; border-radius: 4px; text-decoration: none; font-size: 13px; margin-left: 5px; }
 .btn-link:hover { background: #5c1721; }
+.error { color: #a00000; background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px; }
+.success { color: #155724; background: #d4edda; border: 1px solid #c3e6cb; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px; }
 .footer { background: #741f2b; color: #fffdf7; text-align: center; padding: 15px 20px; font-size: 14px; margin-top: auto; }
 </style>
 </head>
@@ -52,6 +47,12 @@ body { background: #f7f0df; color: #000000; display: flex; flex-direction: colum
         <p>Review and manage pending user registration requests.</p>
     </div>
 
+    <?php if (!empty($message)): ?>
+        <div class="<?php echo ($message_type === 'success') ? 'success' : 'error'; ?>">
+            <?php echo htmlspecialchars($message); ?>
+        </div>
+    <?php endif; ?>
+
     <div class="user-list">
         <?php if ($pending_users && $pending_users->num_rows > 0): ?>
             <?php while ($row = $pending_users->fetch_assoc()): ?>
@@ -61,8 +62,8 @@ body { background: #f7f0df; color: #000000; display: flex; flex-direction: colum
                     Username: <?php echo htmlspecialchars($row['username']); ?> | 
                     Email: <?php echo htmlspecialchars($row['email']); ?> | 
                     Role: <?php echo htmlspecialchars($row['role']); ?>
-                    <a href="pending_registrations.php?action=approve&id=<?php echo $row['id']; ?>" class="btn-link">Approve</a>
-                    <a href="pending_registrations.php?action=reject&id=<?php echo $row['id']; ?>" class="btn-link" onclick="return confirm('Reject this request?')">Reject</a>
+                    <a href="../Controller/AdminPendingRegistrationsValidation.php?action=approve&id=<?php echo $row['id']; ?>" class="btn-link">Approve</a>
+                    <a href="../Controller/AdminPendingRegistrationsValidation.php?action=reject&id=<?php echo $row['id']; ?>" class="btn-link" onclick="return confirm('Reject this request?')">Reject</a>
                 </div>
             <?php endwhile; ?>
         <?php else: ?>
